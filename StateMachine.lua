@@ -8,7 +8,6 @@ function StateMachine:init()
 end
 
 function StateMachine:setCurrentState( state )
-	print( "StateMachine::setCurrentState" )
 	if ( state and state:is_a( State ) and state ~= self.lastState )
 	then
 		self.lastState = self.currentState

@@ -2,23 +2,55 @@ function printf ( ... )
 	return io.stdout:write ( string.format ( ... ) )
 end 
 
-function enum( tbl )
-	local ret = {}
-	for i,v in ipairs(tbl) do
-		ret[v] = i
-		i = i + 1
-	end
-	
-	-- modify metatable below
-	setmetatable( ret, ret )    -- 自己就是自己的 metatable
-	ret.safeindex = function(t, k)    -- 定义一个 assert 版的 __index
-		t.__index = nil
-		local tmp = t[k]
-		t.__index = t.safeindex
-		assert( tmp )
-		return tmp
-	end
-	ret.__index = ret.safeindex    -- 将默认的 __index 替换成 assert 版的 __index
-	-- 结束修改 metatable
-	return ret
+local function _printNontableVar( varValue, varName, indentLevel, printedTables )
+    local indent = string.rep( "    ", indentLevel )
+    if ( varName == "" )
+    then
+        print( indent .. tostring( varValue ) )
+    else
+        print( string.format( "%s%s = %s", indent, varName, tostring( varValue ) ) )
+    end
+end
+
+local function _printTableVar( tableValue, tableName, indentLevel, printedTables )
+    local indent = string.rep( "    ", indentLevel )
+    if ( printedTables[tableValue] ~= nil ) 
+    then
+        local tableAddress = tostring( tableValue )
+        print( string.format( "%s%s = %s", indent, tableName, tableAddress ) )
+    else
+        printedTables[tableValue] = true
+        print( indent .. tableName .. "{" )
+        for key, value in pairs( tableValue ) do
+            if string.sub( key, 1, 1 ) ~= "_"
+            then
+                printVar( value, key, indentLevel + 1, printedTables )
+            end
+        end
+        print( indent .. "}" )
+    end
+end
+
+function printVar( varValue, varName, indentLevel, printedTables )
+    if ( indentLevel == nil )
+    then
+        indentLevel = 0
+    end
+    if ( printedTables == nil )
+    then
+        printedTables = {}
+    end
+    if ( varName == nil )
+    then
+        varName = ""
+    end
+    
+    local indent = string.rep( "    ", indentLevel )
+    local varType = type( varValue )
+    if ( varType == "table" )
+    then
+        _printTableVar( varValue, varName, indentLevel, printedTables )
+    else
+        _printNontableVar( varValue, varName, indentLevel, printedTables )
+    end
 end

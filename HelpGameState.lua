@@ -2,7 +2,7 @@
 --------------------------------------------------------------------------------
 --         FILE:  HelpGameState.lua
 --        USAGE:  ./HelpGameState.lua 
---  DESCRIPTION:  
+--  DESCRIPTION:  Game State for Help Window
 --      OPTIONS:  ---
 -- REQUIREMENTS:  ---
 --         BUGS:  ---
@@ -26,12 +26,12 @@ function HelpGameState:init( layer )
 	self.help:setLoc( BASE_LOCATION_X, BASE_LOCATION_Y )
 end
 
-function MenuState:enter()
+function HelpGameState:enter()
 	print( "entering HelpGameState..." )
 	self.layer:insertProp( self.help )
 end
 
-function MenuState:exit()
+function HelpGameState:exit()
 	print( "exiting HelpGameState..." )
 	self.layer:removeProp( self.help )
 end

@@ -1,6 +1,7 @@
 require "common"
-require "MenuState"
+require "MenuGameState"
 require "HelpGameState"
+require "InPlayGameState"
 require "StateMachine"
 require "Quad2DRepository"
 
@@ -20,18 +21,16 @@ function initMOAISim()
 	MOAISim.pushRenderPass( g_layer )
 end
 
-function gameloop()
-end
-
 function runGame()
 	MOAILogMgr.log( "game [" .. GAME_NAME .. "] is starting\n" )
 
 	QUAD_2D_REPOSITORY.init()
 	STATE_MACHINE:init()
-	MENU_STATE = MenuState( g_layer )
+	MENU_GAME_STATE = MenuGameState( g_layer )
 	HELP_GAME_STATE = HelpGameState( g_layer )
+	INPLAY_GAME_STATE = InPlayGameState( g_layer )
 
-	STATE_MACHINE:setCurrentState( MENU_STATE )
+	STATE_MACHINE:setCurrentState( MENU_GAME_STATE )
 end
 
 function main()
