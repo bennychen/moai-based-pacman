@@ -1,0 +1,42 @@
+require "common"
+require "MenuState"
+require "HelpGameState"
+require "StateMachine"
+require "Quad2DRepository"
+
+g_viewport = nil
+g_layer = nil
+
+function initMOAISim()
+	MOAISim.openWindow( GAME_NAME, SCREEN_WIDTH, SCREEN_HEIGHT )
+
+	g_viewport = MOAIViewport.new()
+	g_viewport:setScale( SCREEN_UNITS_X, SCREEN_UNITS_Y )
+	g_viewport:setSize( SCREEN_WIDTH, SCREEN_HEIGHT )
+
+	g_layer = MOAILayer2D.new()
+	g_layer:setViewport( g_viewport )
+
+	MOAISim.pushRenderPass( g_layer )
+end
+
+function gameloop()
+end
+
+function runGame()
+	MOAILogMgr.log( "game [" .. GAME_NAME .. "] is starting\n" )
+
+	QUAD_2D_REPOSITORY.init()
+	STATE_MACHINE:init()
+	MENU_STATE = MenuState( g_layer )
+	HELP_GAME_STATE = HelpGameState( g_layer )
+
+	STATE_MACHINE:setCurrentState( MENU_STATE )
+end
+
+function main()
+	initMOAISim()	
+	runGame()
+end
+
+main()
