@@ -17,115 +17,64 @@
 
 require "class"
 require "Utility"
+require "media/tiledmap"
 
-MAP_ITEM_EMPTY = 0
-MAP_ITEM_WALL = 1
-MAP_ITEM_BEAN = 2
-MAP_ITEM_SUPER_BEAN = 3
+TILE_MAP_ITEM_EMPTY = 0
+TILE_MAP_ITEM_BEAN = 1
+TILE_MAP_ITEM_SUPER_BEAN_1 = 2
+TILE_MAP_ITEM_SUPER_BEAN_2 = 3
+TILE_MAP_ITEM_WALL_1 = 4
+TILE_MAP_ITEM_WALL_2 = 5
+TILE_MAP_ITEM_WALL_3 = 6
 
 GameMap = class()
 
-GameMap.MAP_WIDTH = 28
-GameMap.MAP_HEIGHT = 31
-
 function GameMap:init( fileName )
-	self:initMapFromFile( fileName )
-end
+	local tileImageWidth = 64
+	local tileImageHeight = 64
+	local tileNumColumn = 3
+	local tileNumRow = 2
+	self.tileDeck = MOAITileDeck2D.new()
+	self.tileDeck:setTexture( "media/" .. map.tilesets[1].image )
+	self.tileDeck:setSize( tileNumColumn, tileNumRow, 
+			map.tilewidth / tileImageWidth, map.tileheight / tileImageHeight )
 
-function GameMap:initMapFromFile( fileName )
-	print( "initializing game map..." )
-	self.mapData = {}
-	self.mapProps = {}
-	local file = io.open( fileName, 'r' )
-	local gridY = 0
-	for line in file:lines()
+	self.tileGrid = MOAIGrid.new()
+	local drawTileWidth = SCREEN_WIDTH / map.width
+	local drawTileHeight = drawTileWidth 
+	self.tileGrid:setSize( map.width, map.height, drawTileWidth, drawTileHeight )
+	self.mapData = map.layers[1].data
+	for i = 1, map.height
 	do
-		print( line )
-		if ( gridY > GameMap.MAP_HEIGHT or line:len() < GameMap.MAP_WIDTH )
-		then
-			print( "ERROR @ GameMap::init - wrong map data" )
-			return false
-		end
-		self.mapData[gridY] = {}
-		for gridX = 0, GameMap.MAP_WIDTH - 1 
+		for j = 1, map.width
 		do
-			local gridData = line:sub( gridX + 1, gridX + 1 )
-			self:initMapGrid( gridData, gridX, gridY )
+			self.tileGrid:setTileFlags( j, map.height - i + 1, self.mapData[( i - 1 ) * map.width + j] )
 		end
-		gridY = gridY + 1
 	end
-	file:close()
 
-	--printVar( self.mapData, "GameMap.mapData" )
+	self.remapper = MOAIDeckRemapper.new()
+	self.remapper:reserve ( map.width * map.height )
 
-	return true
-end
-
-function GameMap:initMapGrid( gridData, gridX, gridY )
-	local gridPosX = gridX * gridWidth - 135
-	local gridPosY = 150 - gridY * gridHeight
-	if ( self.mapProps[gridY] == nil )
-	then
-		self.mapProps[gridY] = {}
-	end
-	if ( gridData == '*' )
-	then
-		self.mapData[gridY][gridX] = MAP_ITEM_WALL
-		self.mapProps[gridY][gridX] = MOAIProp2D.new()
-		self.mapProps[gridY][gridX]:setDeck( QUAD_2D_WALL )
-		self.mapProps[gridY][gridX]:setLoc( gridPosX, gridPosY )
-	elseif ( gridData == 'o' )
-	then
-		self.mapData[gridY][gridX] = MAP_ITEM_BEAN
-		self.mapProps[gridY][gridX] = MOAIProp2D.new()
-		self.mapProps[gridY][gridX]:setDeck( QUAD_2D_BEAN )
-		self.mapProps[gridY][gridX]:setLoc( gridPosX, gridPosY )
-	elseif ( gridData == 'O' )
-	then
-		self.mapData[gridY][gridX] = MAP_ITEM_SUPER_BEAN
-		self.mapProps[gridY][gridX] = MOAIProp2D.new()
-		self.mapProps[gridY][gridX]:setDeck( QUAD_2D_SUPER_BEAN )
-		self.mapProps[gridY][gridX]:setLoc( gridPosX, gridPosY )
-	else
-		self.mapData[gridY][gridX] = MAP_ITEM_EMPTY
-	end
+	self.tileMap = MOAIProp2D.new()
+	self.tileMap:setDeck( self.tileDeck )
+	self.tileMap:setGrid( self.tileGrid )
+	self.tileMap:setLoc( -drawTileWidth * map.width / 2, -drawTileHeight * map.height / 2 )
 end
 
 function GameMap:drawMap( layer )
-	local n = 0
-	for gridY = 0, 23--GameMap.MAP_HEIGHT - 1
-	do
-		for gridX = 0, GameMap.MAP_WIDTH - 1
-		do
-			if ( self:IsGridEmpty( gridX, gridY ) == false )
-			then
-				layer:insertProp( self.mapProps[gridY][gridX] )
-				n = n + 1
-				print( "draw [" .. n .. "]" )
-				if ( n == 512 ) then return end
-			end
-		end
-	end
+	layer:insertProp( self.tileMap )
 end
 
 function GameMap:clearMap( layer )
-	for gridY = 0, GameMap.MAP_HEIGHT - 1
-	do
-		for gridX = 0, GameMap.MAP_WIDTH - 1
-		do
-			if ( self:IsGridEmpty( gridX, gridY ) == false )
-			then
-				layer:removeProp( self.mapProps[gridY][gridX] )
-			end
-		end
-	end
+	layer:removeProp( self.tileMap )
 end
 
 function GameMap:IsGridEmpty( gridX, gridY )
-	if ( gridX >= GameMap.MAP_WIDTH or gridY >= GameMap.MAP_HEIGHT )
+	if ( gridX <= 0 or gridY <= 0 or 
+		 gridX > map.width or gridY > map.height )
 	then
 		print( "ERROR @ GameMap::IsGridEmpty - grid x or y is overflowed!!!" )
 		return
 	end
-	return self.mapData[gridY][gridX] == MAP_ITEM_EMPTY
+	return self.mapData[( gridY - 1 ) * map.width + gridX] == TILE_MAP_ITEM_EMPTY
 end
