@@ -8,8 +8,14 @@ function StateMachine:init()
 end
 
 function StateMachine:setCurrentState( state )
-	if ( state and state:is_a( State ) and state ~= self.lastState )
+	if ( state and state:is_a( State ) )
 	then
+		if ( state == self.lastState )
+		then
+			print( "WARNING @ StateMachine::setCurrentState - " ..
+				   "var [state] is the same as current state" )
+			return
+		end
 		self.lastState = self.currentState
 		self.currentState = state
 		if ( self.lastState )
@@ -18,7 +24,7 @@ function StateMachine:setCurrentState( state )
 		end
 		self.currentState:enter()
 	else
-		print( "ERROR @ StateMachine::setCurrentState: " ..
+		print( "ERROR @ StateMachine::setCurrentState - " ..
 			   "var [state] is not a class type of State" )
 	end
 end
