@@ -25,13 +25,14 @@ function MenuGameState:enter()
 	self.layer:insertProp( self.cursor )
 	self.cursorIndex = MenuGameState.MENU_ITEM_START_GAME
 	self:updateCursorLocation()
-	MOAIInputMgr.device.keyboard:setCallback ( MenuGameState.onKeyboardEvent )
+	MOAIInputMgr.device.keyboard:setCallback( MenuGameState.onKeyboardEvent )
 end
 
 function MenuGameState:exit()
 	print( "exiting MenuGameState..." )
 	self.layer:removeProp( self.menu )
 	self.layer:removeProp( self.cursor )
+	MOAIInputMgr.device.keyboard:setCallback( nil )
 end
 
 function MenuGameState:incrementCursorIndex()
