@@ -1,3 +1,20 @@
+--
+--------------------------------------------------------------------------------
+--         FILE:  MenuGameState.lua
+--        USAGE:  ./InPlayGameState.lua 
+--  DESCRIPTION:  Game State of menu selecting 
+--      OPTIONS:  ---
+-- REQUIREMENTS:  ---
+--         BUGS:  ---
+--        NOTES:  ---
+--       AUTHOR:   (Benny Chen), <rockerbenny@gmail.com>
+--      COMPANY:  
+--      VERSION:  1.0
+--      CREATED:  08/09/2011 21:21:44 CST
+--     REVISION:  ---
+--------------------------------------------------------------------------------
+--
+
 require "State"
 require "StateMachine"
 require "Quad2DRepository"
@@ -64,9 +81,6 @@ end
 
 -- singleton, will be initialized when initializing game
 MENU_GAME_STATE = nil
-
-KEYBOARD_SPACE = 32
-KEYBOARD_ENTER = 13
 
 function MenuGameState.onKeyboardEvent( key, down )
 	if ( MENU_GAME_STATE == nil or down )
