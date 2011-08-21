@@ -30,7 +30,7 @@ function Velocity:init( speed, direction )
 end
 
 function Velocity:setDirection( direction )
-	if ( direction > DIRECTION_LOWER_BOUND and direction < DIRECTION_UPPER_BOUND )
+	if ( Velocity.isValidDirection( direction ) )
 	then
 		self.direction = direction
 	else
@@ -66,9 +66,13 @@ function Velocity:getDisplacement( timeInSeconds )
 	end
 end
 
+function Velocity.isValidDirection( direction )
+	return direction > DIRECTION_LOWER_BOUND and direction < DIRECTION_UPPER_BOUND
+end
+
 function Velocity.isReversedDirection( direction1, direction2 )
-	if ( direction1 > DIRECTION_LOWER_BOUND and direction1 < DIRECTION_UPPER_BOUND and
-		 direction2 > DIRECTION_LOWER_BOUND and direction2 < DIRECTION_UPPER_BOUND )
+	if ( Velocity.isValidDirection( direction1 ) and 
+		 Velocity.isValidDirection( direction2 ) )
 	then
 		if ( direction1 == direction2 )
 		then
