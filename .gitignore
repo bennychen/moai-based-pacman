@@ -1,3 +1,5 @@
 .DS_Store
 session
 media/.DS_Store
+
+*.swp
