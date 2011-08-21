@@ -50,10 +50,11 @@ function GameMap:init()
 	self.tileMap = MOAIProp2D.new()
 	self.tileMap:setDeck( TILE_DECK_2D_MAP )
 	self.tileMap:setGrid( self.tileGrid )
-	self.tileMap:setLoc( -self.width / 2, -self.height / 2 )
+	self.tileMap:setLoc( -self.width / 2, self.height / 2 )
+	self.tileMap:setScl( 1, -1 )
 
 	self.leftTopCorner = MOAITransform.new()
-	self.leftTopCorner:setLoc( -self.width / 2, self.height / 2 )
+	self.leftTopCorner:setLoc( -self.width / 2, -self.height / 2 )
 end
 
 function GameMap:drawMap( layer )
@@ -65,6 +66,29 @@ function GameMap:clearMap( layer )
 end
 
 function GameMap:getTileIndex( posX, posY )
+end
+
+function GameMap:isCollidingWall( leftTopX, leftTopY, rightBottomX, rightBottomY )
+	local EPSILON = tileSize / 50
+	leftTopX = leftTopX + EPSILON
+	leftTopY = leftTopY + EPSILON
+	rightBottomX = rightBottomX - EPSILON
+	rightBottomY = rightBottomY - EPSILON
+
+	local leftTopTileX = math.floor( leftTopX / tileSize ) + 1
+	local leftTopTileY = math.floor( leftTopY / tileSize ) + 1
+	local rightBottomTileX = math.floor( rightBottomX / tileSize ) + 1
+	local rightBottomTileY = math.floor( rightBottomY / tileSize ) + 1
+
+	if ( self:isTileWall( leftTopTileX, leftTopTileY ) or
+		 self:isTileWall( rightBottomTileX, leftTopTileY ) or
+		 self:isTileWall( leftTopTileX, rightBottomTileY ) or
+		 self:isTileWall( rightBottomTileX, rightBottomTileY ) ) 
+	then
+		return true
+	else
+		return false
+	end
 end
 
 function GameMap:isTileBean( tileX, tileY )
