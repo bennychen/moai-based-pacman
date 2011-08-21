@@ -22,4 +22,9 @@ function Vector2:init( x, y )
 	self.y = y
 end
 
+function Vector2:add( vec2 )
+	self.x = self.x + vec2.x
+	self.y = self.y + vec2.y
+end
+
 --TODO: add more functions for Vector2
