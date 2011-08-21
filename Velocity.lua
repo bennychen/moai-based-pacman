@@ -51,10 +51,10 @@ function Velocity:getDisplacement( timeInSeconds )
 	local delta = timeInSeconds * self.speed
 	if ( self.direction == DIRECTION_UP )
 	then
-		return 0, delta 
+		return 0, -delta 
 	elseif ( self.direction == DIRECTION_DOWN )
 	then
-		return 0, -delta
+		return 0, delta
 	elseif ( self.direction == DIRECTION_LEFT )
 	then
 		return -delta, 0

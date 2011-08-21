@@ -63,7 +63,7 @@ end
 
 function MenuGameState:updateCursorLocation()
 	local cursorX = BASE_LOCATION_X - 30
-	local cursorY = BASE_LOCATION_Y - 20 - self.cursorIndex * 30
+	local cursorY = BASE_LOCATION_Y + 20 + self.cursorIndex * 30
 	self.cursor:setLoc( cursorX, cursorY )
 end
 

@@ -24,35 +24,23 @@ function QUAD_2D_REPOSITORY.init()
 	menuHeight = 560 / 2
 	QUAD_2D_MENU = MOAIGfxQuad2D.new()
 	QUAD_2D_MENU:setTexture( "media/mainmenu.png" )
-	QUAD_2D_MENU:setRect( -menuWidth/2, -menuHeight/2, menuWidth/2, menuHeight/2 )
+	QUAD_2D_MENU:setRect( -menuWidth/2, menuHeight/2, menuWidth/2, -menuHeight/2 )
 
 	helpWindowWidth = 400 / 2
 	helpWindowHeight = 300 / 2
 	QUAD_2D_HELP_WINDOW = MOAIGfxQuad2D.new()
 	QUAD_2D_HELP_WINDOW:setTexture( "media/helpmenu.png" )
-	QUAD_2D_HELP_WINDOW:setRect( -helpWindowWidth/2, -helpWindowHeight/2, 
-			helpWindowWidth/2, helpWindowHeight/2 )
+	QUAD_2D_HELP_WINDOW:setRect( -helpWindowWidth/2, helpWindowHeight/2, 
+			helpWindowWidth/2, -helpWindowHeight/2 )
 
-	--tileSize = SCREEN_WIDTH / map.width
-	tileSize = 10
+	tileSize = SCREEN_WIDTH / map.width
+	--tileSize = 10
 
 	beanWidth = tileSize
 	beanHeight = tileSize
 	QUAD_2D_BEAN = MOAIGfxQuad2D.new()
 	QUAD_2D_BEAN:setTexture( "media/bean.png" )
-	QUAD_2D_BEAN:setRect( -beanWidth/2, -beanHeight/2, beanWidth/2, beanHeight/2 )
-
-	wallWidth = tileSize
-	wallHeight = tileSize
-	QUAD_2D_WALL = MOAIGfxQuad2D.new()
-	QUAD_2D_WALL:setTexture( "media/wall.png" )
-	QUAD_2D_WALL:setRect( -wallWidth/2, -wallHeight/2, wallWidth/2, wallHeight/2 )
-
-	superBeanWidth = tileSize
-	superBeanHeight = tileSize
-	QUAD_2D_SUPER_BEAN = MOAIGfxQuad2D.new()
-	QUAD_2D_SUPER_BEAN:setTexture( "media/superbean.png" )
-	QUAD_2D_SUPER_BEAN:setRect( -superBeanWidth/2, -superBeanHeight/2, superBeanWidth/2, superBeanHeight/2 )
+	QUAD_2D_BEAN:setRect( -beanWidth/2, beanHeight/2, beanWidth/2, -beanHeight/2 )
 
 	tileMapSpriteSheetWidth = 64
 	tileMapSpriteSheetHeight = 64
@@ -71,6 +59,5 @@ function QUAD_2D_REPOSITORY.init()
 	TILE_DECK_2D_PACMAN = MOAITileDeck2D.new()
 	TILE_DECK_2D_PACMAN:setTexture( "media/pacman.png" )
 	TILE_DECK_2D_PACMAN:setSize( pacmanSpriteSheetNumColumn, pacmanSpriteSheetNumRow )
-	--TILE_DECK_2D_PACMAN:setRect( 0, 0, pacmanWidth, pacmanHeight )
-	TILE_DECK_2D_PACMAN:setRect( 0, -pacmanHeight, pacmanWidth, 0 ) -- make pacman's origin at left-top corner
+	TILE_DECK_2D_PACMAN:setRect( 0, pacmanHeight, pacmanWidth, 0 ) -- make pacman's origin at left-top corner
 end

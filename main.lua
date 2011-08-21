@@ -12,7 +12,7 @@ function initMOAISim()
 	MOAISim.openWindow( GAME_NAME, SCREEN_WIDTH, SCREEN_HEIGHT )
 
 	g_viewport = MOAIViewport.new()
-	g_viewport:setScale( SCREEN_UNITS_X, SCREEN_UNITS_Y )
+	g_viewport:setScale( SCREEN_UNITS_X, -SCREEN_UNITS_Y )
 	g_viewport:setSize( SCREEN_WIDTH, SCREEN_HEIGHT )
 
 	g_layer = MOAILayer2D.new()
