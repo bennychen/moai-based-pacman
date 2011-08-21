@@ -5,7 +5,7 @@ State = class()
 function State:enter()
 end
 
-function State:onFrame()
+function State:onUpdate()
 end
 
 function State:exit()
