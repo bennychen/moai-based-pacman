@@ -1,3 +1,20 @@
+--
+--------------------------------------------------------------------------------
+--         FILE:  Quad2DRepository.lua
+--        USAGE:  ./Quad2DRepository.lua 
+--  DESCRIPTION:  declare all the needed 2d resources
+--      OPTIONS:  ---
+-- REQUIREMENTS:  ---
+--         BUGS:  ---
+--        NOTES:  ---
+--       AUTHOR:   (Benny Chen), <rockerbenny@gmail.com>
+--      COMPANY:  
+--      VERSION:  1.0
+--      CREATED:  08/14/2011 16:38:49 CST
+--     REVISION:  ---
+--------------------------------------------------------------------------------
+--
+
 require "media/tiledmap"
 
 QUAD_2D_REPOSITORY = {}
@@ -16,23 +33,23 @@ function QUAD_2D_REPOSITORY.init()
 	QUAD_2D_HELP_WINDOW:setRect( -helpWindowWidth/2, -helpWindowHeight/2, 
 			helpWindowWidth/2, helpWindowHeight/2 )
 
-	gridSize = SCREEN_WIDTH / map.width
-	--gridSize = 10
+	--tileSize = SCREEN_WIDTH / map.width
+	tileSize = 10
 
-	beanWidth = gridSize
-	beanHeight = gridSize
+	beanWidth = tileSize
+	beanHeight = tileSize
 	QUAD_2D_BEAN = MOAIGfxQuad2D.new()
 	QUAD_2D_BEAN:setTexture( "media/bean.png" )
 	QUAD_2D_BEAN:setRect( -beanWidth/2, -beanHeight/2, beanWidth/2, beanHeight/2 )
 
-	wallWidth = gridSize
-	wallHeight = gridSize
+	wallWidth = tileSize
+	wallHeight = tileSize
 	QUAD_2D_WALL = MOAIGfxQuad2D.new()
 	QUAD_2D_WALL:setTexture( "media/wall.png" )
 	QUAD_2D_WALL:setRect( -wallWidth/2, -wallHeight/2, wallWidth/2, wallHeight/2 )
 
-	superBeanWidth = gridSize
-	superBeanHeight = gridSize
+	superBeanWidth = tileSize
+	superBeanHeight = tileSize
 	QUAD_2D_SUPER_BEAN = MOAIGfxQuad2D.new()
 	QUAD_2D_SUPER_BEAN:setTexture( "media/superbean.png" )
 	QUAD_2D_SUPER_BEAN:setRect( -superBeanWidth/2, -superBeanHeight/2, superBeanWidth/2, superBeanHeight/2 )
@@ -46,8 +63,8 @@ function QUAD_2D_REPOSITORY.init()
 	TILE_DECK_2D_MAP:setSize( tileMapSpriteSheetNumColumn, tileMapSpriteSheetNumRow, 
 			map.tilewidth / tileMapSpriteSheetWidth, map.tileheight / tileMapSpriteSheetHeight )
 
-	pacmanWidth = gridSize
-	pacmanHeight = gridSize
+	pacmanWidth = tileSize
+	pacmanHeight = tileSize
 	pacmanSpriteSheetNumColumn = 13
 	pacmanSpriteSheetNumRow = 1
 	pacmanSpriteNum = pacmanSpriteSheetNumColumn * pacmanSpriteSheetNumRow
