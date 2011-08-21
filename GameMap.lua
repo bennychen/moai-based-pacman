@@ -31,7 +31,7 @@ GameMap = class()
 
 function GameMap:init()
 	self.tileGrid = MOAIGrid.new()
-	self.tileGrid:setSize( map.width, map.height, gridSize, gridSize )
+	self.tileGrid:setSize( map.width, map.height, tileSize, tileSize )
 	self.mapData = map.layers[1].data
 	for i = 1, map.height
 	do
@@ -44,8 +44,8 @@ function GameMap:init()
 	self.remapper = MOAIDeckRemapper.new()
 	self.remapper:reserve ( map.width * map.height )
 
-	self.width = gridSize * map.width
-	self.height = gridSize * map.height
+	self.width = tileSize * map.width
+	self.height = tileSize * map.height
 
 	self.tileMap = MOAIProp2D.new()
 	self.tileMap:setDeck( TILE_DECK_2D_MAP )
@@ -64,54 +64,54 @@ function GameMap:clearMap( layer )
 	layer:removeProp( self.tileMap )
 end
 
-function GameMap:getGridIndex( posX, posY )
+function GameMap:getTileIndex( posX, posY )
 end
 
-function GameMap:isGridBean( gridX, gridY )
-	if ( gridX <= 0 or gridY <= 0 or 
-		 gridX > map.width or gridY > map.height )
+function GameMap:isTileBean( tileX, tileY )
+	if ( tileX <= 0 or tileY <= 0 or 
+		 tileX > map.width or tileY > map.height )
 	then
-		print( "ERROR @ GameMap::isGridBean - grid x[" .. gridX .. 
-				"] or y[" .. gridY .. "] is overflowed!!!" )
+		print( "ERROR @ GameMap::isTileBean - tile x[" .. tileX .. 
+				"] or y[" .. tileY .. "] is overflowed!!!" )
 		return
 	end
-	return gridData == self.mapData[( gridY - 1 ) * map.width + gridX] == TILE_MAP_ITEM_BEAN
+	return tileData == self.mapData[( tileY - 1 ) * map.width + tileX] == TILE_MAP_ITEM_BEAN
 end
 
-function GameMap:isGridSuperBean( gridX, gridY )
-	if ( gridX <= 0 or gridY <= 0 or 
-		 gridX > map.width or gridY > map.height )
+function GameMap:isTileSuperBean( tileX, tileY )
+	if ( tileX <= 0 or tileY <= 0 or 
+		 tileX > map.width or tileY > map.height )
 	then
-		print( "ERROR @ GameMap::isGridSuperBean - grid x[" .. gridX .. 
-				"] or y[" .. gridY .. "] is overflowed!!!" )
+		print( "ERROR @ GameMap::isTileSuperBean - tile x[" .. tileX .. 
+				"] or y[" .. tileY .. "] is overflowed!!!" )
 		return
 	end
-	local gridData = self.mapData[( gridY - 1 ) * map.width + gridX]
-	return gridData == TILE_MAP_ITEM_SUPER_BEAN_1 or
-		   gridData == TILE_MAP_ITEM_SUPER_BEAN_2
+	local tileData = self.mapData[( tileY - 1 ) * map.width + tileX]
+	return tileData == TILE_MAP_ITEM_SUPER_BEAN_1 or
+		   tileData == TILE_MAP_ITEM_SUPER_BEAN_2
 end
 
-function GameMap:isGridWall( gridX, gridY )
-	if ( gridX <= 0 or gridY <= 0 or 
-		 gridX > map.width or gridY > map.height )
+function GameMap:isTileWall( tileX, tileY )
+	if ( tileX <= 0 or tileY <= 0 or 
+		 tileX > map.width or tileY > map.height )
 	then
-		print( "ERROR @ GameMap::isGridWall - grid x[" .. gridX .. 
-				"] or y[" .. gridY .. "] is overflowed!!!" )
+		print( "ERROR @ GameMap::isTileWall - tile x[" .. tileX .. 
+				"] or y[" .. tileY .. "] is overflowed!!!" )
 		return
 	end
-	local gridData = self.mapData[( gridY - 1 ) * map.width + gridX]
-	return gridData == TILE_MAP_ITEM_WALL_1 or
-		   gridData == TILE_MAP_ITEM_WALL_2 or 
-		   gridData == TILE_MAP_ITEM_WALL_3
+	local tileData = self.mapData[( tileY - 1 ) * map.width + tileX]
+	return tileData == TILE_MAP_ITEM_WALL_1 or
+		   tileData == TILE_MAP_ITEM_WALL_2 or 
+		   tileData == TILE_MAP_ITEM_WALL_3
 end
 
-function GameMap:isGridEmpty( gridX, gridY )
-	if ( gridX <= 0 or gridY <= 0 or 
-		 gridX > map.width or gridY > map.height )
+function GameMap:isTileEmpty( tileX, tileY )
+	if ( tileX <= 0 or tileY <= 0 or 
+		 tileX > map.width or tileY > map.height )
 	then
-		print( "ERROR @ GameMap::isGridEmpty - grid x[" .. gridX .. 
-				"] or y[" .. gridY .. "] is overflowed!!!" )
+		print( "ERROR @ GameMap::isTileEmpty - tile x[" .. tileX .. 
+				"] or y[" .. tileY .. "] is overflowed!!!" )
 		return
 	end
-	return self.mapData[( gridY - 1 ) * map.width + gridX] == TILE_MAP_ITEM_EMPTY
+	return self.mapData[( tileY - 1 ) * map.width + tileX] == TILE_MAP_ITEM_EMPTY
 end
