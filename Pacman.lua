@@ -20,7 +20,7 @@ require "Vector2"
 
 Pacman = class()
 
-function Pacman:init( parentTransform, spawnPoint, spawnDirection )
+function Pacman:init( parentTransform, spawnPoint, spawnDirection, speed )
 	self.stateMachine = StateMachine()
 
 	self.prop = MOAIProp2D.new()
@@ -34,8 +34,7 @@ function Pacman:init( parentTransform, spawnPoint, spawnDirection )
 
 	self.spawnPoint = spawnPoint
 	self.spawnDirection = spawnDirection
-	--TODO: pass speed from param
-	self.velocity = Velocity( 50, spawnDirection )
+	self.velocity = Velocity( speed, spawnDirection )
 	self.isMoving = false
 end
 
@@ -123,6 +122,17 @@ function Pacman:movingThreadMain()
 	end
 end
 
+function Pacman:revertOneFrameBySpeed()
+	local displacementX = 0
+	local displacementY = 0
+	displacementX, displacementY = self.velocity:getDisplacement( FRAME_TIME )
+	self.prop:addLoc( -displacementX, -displacementY )
+end
+
+function Pacman:getAbsolutePosition()
+	return self.prop:getLoc()
+end
+
 function Pacman:show( layer )
 	layer:insertProp( self.prop )
 end
@@ -182,7 +192,7 @@ function Pacman:getMovingAnimStartDeckIndex( direction )
 end
 
 function Pacman:resetToSpawn( layer )
-	self.prop:setLoc( gridSize * ( self.spawnPoint.x - 1 ),
-				       -gridSize * ( self.spawnPoint.y - 1 ) )
+	self.prop:setLoc( tileSize * ( self.spawnPoint.x - 1 ),
+				      tileSize * ( self.spawnPoint.y - 1 ) )
 	self:setDirection( self.spawnDirection )
 end
