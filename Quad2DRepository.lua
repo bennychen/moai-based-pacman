@@ -50,6 +50,7 @@ function QUAD_2D_REPOSITORY.init()
 	TILE_DECK_2D_MAP:setTexture( "media/" .. map.tilesets[1].image )
 	TILE_DECK_2D_MAP:setSize( tileMapSpriteSheetNumColumn, tileMapSpriteSheetNumRow, 
 			map.tilewidth / tileMapSpriteSheetWidth, map.tileheight / tileMapSpriteSheetHeight )
+	TILE_DECK_2D_MAP:setRect( -0.5, 0.5, 0.5, -0.5 )
 
 	pacmanWidth = tileSize
 	pacmanHeight = tileSize
