@@ -37,7 +37,7 @@ function GameMap:init()
 	do
 		for j = 1, map.width
 		do
-			self.tileGrid:setTileFlags( j, map.height - i + 1, self.mapData[( i - 1 ) * map.width + j] )
+			self.tileGrid:setTile( j, i, self.mapData[( i - 1 ) * map.width + j] )
 		end
 	end
 
@@ -50,8 +50,7 @@ function GameMap:init()
 	self.tileMap = MOAIProp2D.new()
 	self.tileMap:setDeck( TILE_DECK_2D_MAP )
 	self.tileMap:setGrid( self.tileGrid )
-	self.tileMap:setLoc( -self.width / 2, self.height / 2 )
-	self.tileMap:setScl( 1, -1 )
+	self.tileMap:setLoc( -self.width / 2, -self.height / 2 )
 
 	self.leftTopCorner = MOAITransform.new()
 	self.leftTopCorner:setLoc( -self.width / 2, -self.height / 2 )
@@ -66,25 +65,66 @@ function GameMap:clearMap( layer )
 end
 
 function GameMap:getTileIndex( posX, posY )
+	local tileX = math.floor( posX / tileSize ) + 1
+	local tileY = math.floor( posY / tileSize ) + 1
+	return tileX, tileY
 end
 
-function GameMap:isCollidingWall( leftTopX, leftTopY, rightBottomX, rightBottomY )
+function GameMap:isCollidingWall( leftTopX, leftTopY, rightBottomX, rightBottomY, printInfo )
 	local EPSILON = tileSize / 50
 	leftTopX = leftTopX + EPSILON
 	leftTopY = leftTopY + EPSILON
 	rightBottomX = rightBottomX - EPSILON
 	rightBottomY = rightBottomY - EPSILON
 
-	local leftTopTileX = math.floor( leftTopX / tileSize ) + 1
-	local leftTopTileY = math.floor( leftTopY / tileSize ) + 1
-	local rightBottomTileX = math.floor( rightBottomX / tileSize ) + 1
-	local rightBottomTileY = math.floor( rightBottomY / tileSize ) + 1
+	local leftTopTileX
+	local leftTopTileY
+	local rightBottomTileX
+	local rightBottomTileY
+	leftTopTileX, leftTopTileY = self:getTileIndex( leftTopX, leftTopY )
+	rightBottomTileX, rightBottomTileY = self:getTileIndex( rightBottomX, rightBottomY )
+
+	if ( printInfo ~= nil )
+	then
+		printVar( leftTopX, "leftTopXofPacman" )
+		printVar( leftTopY, "leftTopYofPacman" )
+		printVar( rightBottomX, "rightBottomXofPacman" )
+		printVar( rightBottomY, "rightBottomYofPacman" )
+		printVar( leftTopTileX, "leftTopTileX" )
+		printVar( leftTopTileY, "leftTopTileY" )
+		printVar( rightBottomTileX, "rightBottomTileX" )
+		printVar( rightBottomTileY, "rightBottomTileY" )
+	end
 
 	if ( self:isTileWall( leftTopTileX, leftTopTileY ) or
 		 self:isTileWall( rightBottomTileX, leftTopTileY ) or
 		 self:isTileWall( leftTopTileX, rightBottomTileY ) or
 		 self:isTileWall( rightBottomTileX, rightBottomTileY ) ) 
 	then
+		if ( printInfo )
+		then
+			print( '----- hitting wall -----')
+		end
+		return true
+	else
+		return false
+	end
+end
+
+function GameMap:clearTileBean( tileX, tileY )
+	if ( self:isTileBean( tileX, tileY ) )
+	then
+		self.tileGrid:setTile( tileX, tileY, TILE_MAP_ITEM_EMPTY )
+		return true
+	else
+		return false
+	end
+end
+
+function GameMap:clearTileSuperBean( tileX, tileY )
+	if ( self:isTileSuperBean( tileX, tileY ) )
+	then
+		self.tileGrid:setTile( tileX, tileY, TILE_MAP_ITEM_EMPTY )
 		return true
 	else
 		return false
@@ -99,7 +139,7 @@ function GameMap:isTileBean( tileX, tileY )
 				"] or y[" .. tileY .. "] is overflowed!!!" )
 		return
 	end
-	return tileData == self.mapData[( tileY - 1 ) * map.width + tileX] == TILE_MAP_ITEM_BEAN
+	return self.mapData[( tileY - 1 ) * map.width + tileX] == TILE_MAP_ITEM_BEAN
 end
 
 function GameMap:isTileSuperBean( tileX, tileY )

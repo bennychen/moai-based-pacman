@@ -35,7 +35,6 @@ function Pacman:init( parentTransform, spawnPoint, spawnDirection, speed )
 	self.spawnPoint = spawnPoint
 	self.spawnDirection = spawnDirection
 	self.velocity = Velocity( speed, spawnDirection )
-	self.isMoving = false
 end
 
 function Pacman:initAnimation()
@@ -51,29 +50,12 @@ function Pacman:setDirection( direction )
 			return
 		end
 
-		if ( self.isMoving )
-		then
-			self:stopMovingWithAnimation()
-			self.velocity:setDirection( direction )
-			self:startMovingWithAnimation()
-		else
-			self:stopMovingAnimation()
-			self.velocity:setDirection( direction )
-			self:startMovingAnimation()
-		end
+		self:stopMovingAnimation()
+		self.velocity:setDirection( direction )
+		self:startMovingAnimation()
 	else
 		print( "ERROR @ Pacman:setDirection - failed, invalid direction" )
 	end
-end
-
-function Pacman:startMovingWithAnimation()
-	self:startMovingAnimation()
-	self:startMoving()
-end
-
-function Pacman:stopMovingWithAnimation()
-	self:stopMoving()
-	self:stopMovingAnimation()
 end
 
 function Pacman:startMovingAnimation()
@@ -86,40 +68,11 @@ function Pacman:stopMovingAnimation()
 	self.movingAnim[self.velocity.direction]:stop()
 end
 
-function Pacman:startMoving()
-	if ( self.isMoving == nil or self.isMoving == false )
-	then
-		self.isMoving = true
-		if ( self.movingThread == nil )
-		then
-			self.movingThread = MOAIThread.new()
-		end
-		self.movingThread:run( Pacman.movingThreadMain, self )
-	end
-end
-
-function Pacman:stopMoving()
-	if ( self.isMoving == nil or self.isMoving == true )
-	then
-		self.isMoving = false
-		self.movingAction:stop()
-		self.movingThread:stop()
-	end
-end
-
-function Pacman:movingThreadMain()
-	local deltaX = nil
-	local deltaY = nil
-	while ( self.isMoving == true )
-	do
-		MOVE_ANIMATION_UPDATE_TIME = 100
-		deltaX, deltaY = self.velocity:getDisplacement( MOVE_ANIMATION_UPDATE_TIME )
-		self.movingAction = self.prop:moveLoc( deltaX, deltaY, MOVE_ANIMATION_UPDATE_TIME, MOAIEaseType.LINEAR )
-		while ( self.movingAction:isBusy() )
-		do
-			coroutine.yield()
-		end
-	end
+function Pacman:moveOneFrameBySpeed()
+	local displacementX = 0
+	local displacementY = 0
+	displacementX, displacementY = self.velocity:getDisplacement( FRAME_TIME )
+	self.prop:addLoc( displacementX, displacementY )
 end
 
 function Pacman:revertOneFrameBySpeed()
@@ -129,8 +82,24 @@ function Pacman:revertOneFrameBySpeed()
 	self.prop:addLoc( -displacementX, -displacementY )
 end
 
-function Pacman:getAbsolutePosition()
+function Pacman:getLeftTopLoc()
 	return self.prop:getLoc()
+end
+
+function Pacman:getCenterLoc( leftTopX, leftTopY )
+	if ( leftTopX == nil or leftTopY == nil )
+	then
+		leftTopX, leftTopY = self:getLeftTopLoc()
+	end
+	return leftTopX + pacmanWidth / 2, leftTopY + pacmanHeight / 2
+end
+
+function Pacman:getRightBottomLoc( leftTopX, leftTopY )
+	if ( leftTopX == nil or leftTopY == nil )
+	then
+		leftTopX, leftTopY = self:getLeftTopLoc()
+	end
+	return leftTopX + pacmanWidth, leftTopY + pacmanHeight
 end
 
 function Pacman:show( layer )

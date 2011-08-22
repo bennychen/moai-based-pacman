@@ -1,4 +1,4 @@
---
+
 --------------------------------------------------------------------------------
 --         FILE:  InPlayGameState.lua
 --        USAGE:  ./InPlayGameState.lua 
@@ -36,16 +36,8 @@ function InPlayGameState:enter()
 
 	self.gameMap:drawMap( self.layer )
 	self.pacman:resetToSpawn()
-
 	self.pacman:show( self.layer )
-
-	if ( self.mainThread == nil )
-	then
-		self.mainThread = MOAIThread.new()
-	end
-	self.mainThread:run( InPlayGameState.onUpdate, self )
-
-	self.pacman:startMovingWithAnimation()
+	self.pacman:startMovingAnimation()
 
 	MOAIInputMgr.device.keyboard:setCallback( InPlayGameState.onKeyboardEvent )
 end
@@ -55,54 +47,33 @@ function InPlayGameState:exit()
 
 	self.gameMap:clearMap( self.layer )	
 	self.pacman:hide( self.layer )
-	self.pacman:stopMovingWithAnimation()
+	self.pacman:stopMovingAnimation()
 
-	self.mainThread:stop()
 	MOAIInputMgr.device.keyboard:setCallback( nil )
 end
 
 function InPlayGameState:onUpdate()
-	while ( true )
-	do
-		local x
-		local y
-		if ( self.pacman.isMoving == true )
-		then
-			if ( self:isPacmanCollidingWall() )
-			then
-				--x, y = self.pacman:getAbsolutePosition()
-				--printVar( x, "pacmanLeftTopX before stop moving" )
-				--printVar( y, "pacmanLeftTopY before stop moving" )
-				self.pacman:stopMoving()
-				self.pacman:revertOneFrameBySpeed()
-			end
---		else
---			if ( printed == nil )
---			then
---				x, y = self.pacman:getAbsolutePosition()
---				printVar( x, "pacmanLeftTopX after stop moving" )
---				printVar( y, "pacmanLeftTopY after stop moving" )
---				printed = true
---			end
-		end
+	if ( not self:willPacmanCollideWall( self.pacman.velocity.direction ) )
+	then
+		self.pacman:moveOneFrameBySpeed()
+		self:pacmanTryEatBean()
+		self:pacmanTryEatSuperBean()
+	end
 
-		if ( self.pacman.isSeekingPath == true )
-		then
-			self:seekPathForPacman( self.pacman.desiredDirection )
-		end
-
-		coroutine.yield()
+	if ( self.pacman.isSeekingPath == true )
+	then
+		self:seekPathForPacman( self.pacman.desiredDirection )
 	end
 end
 
 function InPlayGameState:seekPathForPacman( desiredDirection )
 	if ( not self:willPacmanCollideWall( self.pacman.desiredDirection ) )
 	then
-		self:changePacmanDirection( self.pacman.desiredDirection )
+		self.pacman:setDirection( self.pacman.desiredDirection )
 		self.pacman.isSeekingPath = false
 	elseif ( self:willPacmanCollideWall( self.pacman.velocity.direction ) )
 	then
-		--print( "seek path failed, both current direction and desired direction are not passable" )
+		print( "seek path failed, both current direction and desired direction are not passable" )
 		self.pacman.isSeekingPath = false
 	end
 end
@@ -112,9 +83,9 @@ function InPlayGameState:willPacmanCollideWall( direction )
 	local pacmanLeftTopY = 0
 	local pacmanRightBottomX = 0
 	local pacmanRightBottomY = 0
-	pacmanLeftTopX, pacmanLeftTopY = self.pacman:getAbsolutePosition() 
-	pacmanRightBottomX = pacmanLeftTopX + pacmanWidth
-	pacmanRightBottomY = pacmanLeftTopY + pacmanHeight
+	pacmanLeftTopX, pacmanLeftTopY = self.pacman:getLeftTopLoc() 
+	pacmanRightBottomX, pacmanRightBottomY = 
+		self.pacman:getRightBottomLoc( pacmanLeftTopX, pacmanLeftTopY )
 
 	pacmanSpeed = self.pacman.velocity.speed
 	local displacementX = 0
@@ -135,33 +106,41 @@ function InPlayGameState:isPacmanCollidingWall()
 	local pacmanLeftTopY = 0
 	local pacmanRightBottomX = 0
 	local pacmanRightBottomY = 0
-	pacmanLeftTopX, pacmanLeftTopY = self.pacman:getAbsolutePosition() 
-	pacmanRightBottomX = pacmanLeftTopX + pacmanWidth
-	pacmanRightBottomY = pacmanLeftTopY + pacmanHeight
+	pacmanLeftTopX, pacmanLeftTopY = self.pacman:getLeftTopLoc() 
+	pacmanRightBottomX, pacmanRightBottomY = 
+		self.pacman:getRightBottomLoc( pacmanLeftTopX, pacmanLeftTopY )
 	return self.gameMap:isCollidingWall( pacmanLeftTopX, pacmanLeftTopY, 
 			pacmanRightBottomX, pacmanRightBottomY )
 end
 
+function InPlayGameState:pacmanTryEatBean()
+	local pacmanCenterX = 0
+	local pacmanCenterY = 0
+	pacmanCenterX, pacmanCenterY = self.pacman:getCenterLoc()
+	self.gameMap:clearTileBean( 
+			self.gameMap:getTileIndex( pacmanCenterX, pacmanCenterY ) )
+end
+
+function InPlayGameState:pacmanTryEatSuperBean()
+	local pacmanCenterX = 0
+	local pacmanCenterY = 0
+	pacmanCenterX, pacmanCenterY = self.pacman:getCenterLoc()
+	self.gameMap:clearTileSuperBean( 
+			self.gameMap:getTileIndex( pacmanCenterX, pacmanCenterY ) )
+end
+
 function InPlayGameState:tryChangePacmanDirection( direction )
-	printed = nil --TODO:remove this
-	local pacmanLeftTopX = 0
-	local pacmanLeftTopY = 0
-	pacmanLeftTopX, pacmanLeftTopY = self.pacman:getAbsolutePosition() 
+	if ( direction == self.pacman.velocity.direction )
+	then
+		return
+	end
 
 	if ( self:willPacmanCollideWall( direction ) )
 	then
 		self.pacman.desiredDirection = direction
 		self.pacman.isSeekingPath = true
 	else
-		self:changePacmanDirection( direction )	
-	end
-end
-
-function InPlayGameState:changePacmanDirection( direction )
-	self.pacman:setDirection( direction )
-	if ( INPLAY_GAME_STATE.pacman.isMoving == false )
-	then
-		INPLAY_GAME_STATE.pacman:startMoving()
+		self.pacman:setDirection( direction )
 	end
 end
 
@@ -169,7 +148,7 @@ end
 INPLAY_GAME_STATE = nil
 
 function InPlayGameState.onKeyboardEvent( key, down )
-	if ( INPLAY_GAME_STATE == nil or down )
+	if ( INPLAY_GAME_STATE == nil or up )
 	then
 		return
 	end
