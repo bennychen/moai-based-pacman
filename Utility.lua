@@ -54,3 +54,19 @@ function printVar( varValue, varName, indentLevel, printedTables )
         _printNontableVar( varValue, varName, indentLevel, printedTables )
     end
 end
+
+function printCallStack( level )
+    level = level + 1
+    local n = 1;
+    print( "================call stack================" )
+    while ( true ) do
+        local info = debug.getinfo( level, "Sln" )
+        if not info then break end
+        if info.what == "Lua" then
+            if ( info.name == nil ) then info.name = "Event Handler" end
+            print( string.format( "%d: [%s@%d]:%s", n, info.short_src, info.currentline, info.name ) )
+        end
+        level = level + 1
+        n = n + 1
+    end
+end
