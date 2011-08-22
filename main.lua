@@ -25,12 +25,13 @@ function runGame()
 	MOAILogMgr.log( "game [" .. GAME_NAME .. "] is starting\n" )
 
 	QUAD_2D_REPOSITORY.init()
-	STATE_MACHINE:init()
+	GAME_STATE_MACHIEN = StateMachine()
 	MENU_GAME_STATE = MenuGameState( g_layer )
 	HELP_GAME_STATE = HelpGameState( g_layer )
 	INPLAY_GAME_STATE = InPlayGameState( g_layer )
 
-	STATE_MACHINE:setCurrentState( MENU_GAME_STATE )
+	GAME_STATE_MACHIEN:run()
+	GAME_STATE_MACHIEN:setCurrentState( MENU_GAME_STATE )
 end
 
 function main()

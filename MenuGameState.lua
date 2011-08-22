@@ -70,10 +70,10 @@ end
 function MenuGameState:onMenuSelected()
 	if ( self.cursorIndex == MenuGameState.MENU_ITEM_START_GAME )
 	then
-		STATE_MACHINE:setCurrentState( INPLAY_GAME_STATE )
+		GAME_STATE_MACHIEN:setCurrentState( INPLAY_GAME_STATE )
 	elseif ( self.cursorIndex == MenuGameState.MENU_ITEM_HELP )
 	then
-		STATE_MACHINE:setCurrentState( HELP_GAME_STATE )
+		GAME_STATE_MACHIEN:setCurrentState( HELP_GAME_STATE )
 	elseif ( self.cursorIndex == MenuGameState.MENU_ITEM_QUIT )
 	then
 	end

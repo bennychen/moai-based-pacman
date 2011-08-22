@@ -7,6 +7,14 @@ function StateMachine:init()
 	self.lastState = nil
 end
 
+function StateMachine:run()
+	if ( self.mainThread == nil )
+	then
+		self.mainThread = MOAIThread.new()
+		self.mainThread:run( self.updateState, self )
+	end
+end
+
 function StateMachine:setCurrentState( state )
 	if ( state and state:is_a( State ) )
 	then
@@ -30,11 +38,13 @@ function StateMachine:setCurrentState( state )
 end
 
 function StateMachine:updateState()
-	if ( self.currentState )
-	then
-		self.currentState:execute()
+	while ( true )
+	do
+		if ( self.currentState ~= nil )
+		then
+			self.currentState:onUpdate()
+			--print( MOAISim:getPerformance() )
+		end
+		coroutine.yield()
 	end
 end
-
---singleton
-STATE_MACHINE = StateMachine()
