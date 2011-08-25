@@ -15,153 +15,62 @@
 --------------------------------------------------------------------------------
 --
 
-require "Velocity"
+require "GameEntity"
 require "Vector2"
 
-Pacman = class()
+Pacman = class( GameEntity )
 
-function Pacman:init( parentTransform, spawnPoint, spawnDirection, speed )
-	self.stateMachine = StateMachine()
+Pacman.ANIM_DYING = "dying"
 
-	self.prop = MOAIProp2D.new()
-	self.prop:setDeck( TILE_DECK_2D_PACMAN )
-	self.animRemapper = MOAIDeckRemapper.new()
-	self.animRemapper:reserve( pacmanSpriteNum )
-	self.prop:setRemapper( self.animRemapper )
-	self.prop:setParent( parentTransform )
+function Pacman:init( parentTransform, spawnPoint, spawnDirection, 
+		speed, tileDeck2D, spriteNum )
+	GameEntity.init( self, parentTransform, spawnPoint, spawnDirection, 0, tileDeck2D, spriteNum )
 
+	self.movingSpeed = speed
 	self:initAnimation()
-
-	self.spawnPoint = spawnPoint
-	self.spawnDirection = spawnDirection
-	self.velocity = Velocity( speed, spawnDirection )
 end
 
 function Pacman:initAnimation()
-	self:initMovingAnimations()
-	self:initDyingAnimation()
+	for direction = DIRECTION_LEFT, DIRECTION_DOWN
+	do
+		local animStartDeckIndex = self:getMovingAnimStartDeckIndex( direction ) 
+		self.animatable:addAnimation( direction, animStartDeckIndex, animStartDeckIndex + 1,
+				0.30, MOAIEaseType.FLAT, MOAITimer.LOOP )
+	end
+	self.animatable:addAnimation( Pacman.ANIM_DYING, 9, 13, 
+			0.50, MOAIEaseType.FLAT, MOAITimer.NORMAL )
 end
 
-function Pacman:setDirection( direction )
-	if ( direction > DIRECTION_LOWER_BOUND and direction < DIRECTION_UPPER_BOUND )
+function Pacman:setDirectionWithAnimation( direction )
+	if ( Velocity.isValidDirection( direction ) )
 	then
 		if ( direction == self.velocity.direction )
 		then
 			return
 		end
 
-		self:stopMovingAnimation()
 		self.velocity:setDirection( direction )
-		self:startMovingAnimation()
+		self.animatable:startAnimation( direction )
 	else
 		print( "ERROR @ Pacman:setDirection - failed, invalid direction" )
 	end
 end
 
-function Pacman:startMovingAnimation()
-	local direction = self.velocity.direction
-	self.prop:setIndex( self:getMovingAnimStartDeckIndex( direction ) )
-	self.movingAnim[direction]:start()
+function Pacman:startMoving()
+	self.velocity.speed = self.movingSpeed
+	self.animatable:startAnimation( self.velocity.direction )
 end
 
-function Pacman:stopMovingAnimation()
-	self.movingAnim[self.velocity.direction]:stop()
+function Pacman:stopMoving()
+	self.velocity.speed = 0
+	self.animatable:stopAnimation( self.velocity.direction )
 end
 
-function Pacman:moveOneFrameBySpeed()
-	local displacementX = 0
-	local displacementY = 0
-	displacementX, displacementY = self.velocity:getDisplacement( FRAME_TIME )
-	self.prop:addLoc( displacementX, displacementY )
-end
-
-function Pacman:revertOneFrameBySpeed()
-	local displacementX = 0
-	local displacementY = 0
-	displacementX, displacementY = self.velocity:getDisplacement( FRAME_TIME )
-	self.prop:addLoc( -displacementX, -displacementY )
-end
-
-function Pacman:getLeftTopLoc()
-	return self.prop:getLoc()
-end
-
-function Pacman:getCenterLoc( leftTopX, leftTopY )
-	if ( leftTopX == nil or leftTopY == nil )
-	then
-		leftTopX, leftTopY = self:getLeftTopLoc()
-	end
-	return leftTopX + pacmanWidth / 2, leftTopY + pacmanHeight / 2
-end
-
-function Pacman:getRightBottomLoc( leftTopX, leftTopY )
-	if ( leftTopX == nil or leftTopY == nil )
-	then
-		leftTopX, leftTopY = self:getLeftTopLoc()
-	end
-	return leftTopX + pacmanWidth, leftTopY + pacmanHeight
-end
-
-function Pacman:show( layer )
-	layer:insertProp( self.prop )
-end
-
-function Pacman:hide( layer )
-	layer:removeProp( self.prop )
-end
-
-function Pacman:setCurrentState( state )
-	self.stateMachine:setCurrentState( state )
-end
-
-function Pacman:initMovingAnimations()
-	self.movingAnim = {}
-	for direction = DIRECTION_LEFT, DIRECTION_DOWN
-	do
-		self:initMovingAnimation( direction )
-	end
-end
-
-function Pacman:initMovingAnimation( direction )
-	local animStartDeckIndex = self:getMovingAnimStartDeckIndex( direction ) 
-
-	local moveCurve = MOAIAnimCurve.new()
-	moveCurve:reserveKeys( 3 )
-	moveCurve:setKey( 1, 0.00, animStartDeckIndex, MOAIEaseType.FLAT )
-	moveCurve:setKey( 2, 0.20, animStartDeckIndex + 1, MOAIEaseType.FLAT )
-	moveCurve:setKey( 3, 0.40, animStartDeckIndex, MOAIEaseType.FLAT )
-
-	self.movingAnim[direction] = MOAIAnim:new()
-	self.movingAnim[direction]:reserveLinks( 1 )
-	self.movingAnim[direction]:setLink( 1, moveCurve, self.animRemapper, animStartDeckIndex )
-	self.movingAnim[direction]:setMode( MOAITimer.LOOP )
-end
-
-function Pacman:initDyingAnimation()
-	local dyingAnimBeginDeckIndex = 9
-	local dyingAnimEndDeckIndex = 13
-	local dyingAnimFrameNum = dyingAnimEndDeckIndex - dyingAnimBeginDeckIndex + 1 
-
-	local dyingCurve = MOAIAnimCurve.new()
-	dyingCurve:reserveKeys( dyingAnimEndDeckIndex - dyingAnimBeginDeckIndex + 1 )
-	for frame = 1, dyingAnimEndDeckIndex
-	do
-		dyingCurve:setKey( frame, ( frame - 1 ) * 0.30, 
-				dyingAnimBeginDeckIndex + frame - 1, MOAIEaseType.FLAT )
-	end
-
-	self.dyingAnim = MOAIAnim.new()
-	self.dyingAnim:reserveLinks( 1 )
-	self.dyingAnim:setLink( 1, dyingCurve, self.animRemapper, dyingAnimBeginDeckIndex )
-	self.dyingAnim:setMode( MOAITimer.NORMAL )
+function Pacman:setDead()
+	self.velocity.speed = 0
+	self.animatable:startAnimation( Pacman.ANIM_DYING )
 end
 
 function Pacman:getMovingAnimStartDeckIndex( direction )
 	return ( direction * 2 - 1 )
-end
-
-function Pacman:resetToSpawn( layer )
-	self.prop:setLoc( tileSize * ( self.spawnPoint.x - 1 ),
-				      tileSize * ( self.spawnPoint.y - 1 ) )
-	self:setDirection( self.spawnDirection )
 end

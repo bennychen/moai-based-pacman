@@ -26,6 +26,8 @@ MenuGameState.MENU_ITEM_HELP = 1
 MenuGameState.MENU_ITEM_QUIT = 2
 
 function MenuGameState:init( layer )
+	State.init( self, "MenuGameState" )
+
 	self.layer = layer
 
 	self.menu = MOAIProp2D.new()
@@ -37,7 +39,6 @@ function MenuGameState:init( layer )
 end
 
 function MenuGameState:enter()
-	print( "entering MenuGameState..." )
 	self.layer:insertProp( self.menu )
 	self.layer:insertProp( self.cursor )
 	self.cursorIndex = MenuGameState.MENU_ITEM_START_GAME
@@ -46,7 +47,6 @@ function MenuGameState:enter()
 end
 
 function MenuGameState:exit()
-	print( "exiting MenuGameState..." )
 	self.layer:removeProp( self.menu )
 	self.layer:removeProp( self.cursor )
 	MOAIInputMgr.device.keyboard:setCallback( nil )
@@ -70,10 +70,10 @@ end
 function MenuGameState:onMenuSelected()
 	if ( self.cursorIndex == MenuGameState.MENU_ITEM_START_GAME )
 	then
-		GAME_STATE_MACHIEN:setCurrentState( INPLAY_GAME_STATE )
+		GAME_STATE_MACHINE:setCurrentState( STAGE_INTRO_GAME_STATE )
 	elseif ( self.cursorIndex == MenuGameState.MENU_ITEM_HELP )
 	then
-		GAME_STATE_MACHIEN:setCurrentState( HELP_GAME_STATE )
+		GAME_STATE_MACHINE:setCurrentState( HELP_GAME_STATE )
 	elseif ( self.cursorIndex == MenuGameState.MENU_ITEM_QUIT )
 	then
 	end

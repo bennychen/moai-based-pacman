@@ -27,12 +27,10 @@ function HelpGameState:init( layer )
 end
 
 function HelpGameState:enter()
-	print( "entering HelpGameState..." )
 	self.layer:insertProp( self.help )
 end
 
 function HelpGameState:exit()
-	print( "exiting HelpGameState..." )
 	self.layer:removeProp( self.help )
 end
 

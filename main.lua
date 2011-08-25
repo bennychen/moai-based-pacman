@@ -1,42 +1,25 @@
 require "common"
-require "MenuGameState"
-require "HelpGameState"
-require "InPlayGameState"
-require "StateMachine"
-require "Quad2DRepository"
+require "Game"
 
-g_viewport = nil
-g_layer = nil
+RENDER_SYSTEM = {}
 
-function initMOAISim()
+function RENDER_SYSTEM.init()
 	MOAISim.openWindow( GAME_NAME, SCREEN_WIDTH, SCREEN_HEIGHT )
 
-	g_viewport = MOAIViewport.new()
-	g_viewport:setScale( SCREEN_UNITS_X, -SCREEN_UNITS_Y )
-	g_viewport:setSize( SCREEN_WIDTH, SCREEN_HEIGHT )
+	RENDER_SYSTEM.viewport = MOAIViewport.new()
+	RENDER_SYSTEM.viewport:setScale( SCREEN_UNITS_X, -SCREEN_UNITS_Y )
+	RENDER_SYSTEM.viewport:setSize( SCREEN_WIDTH, SCREEN_HEIGHT )
 
-	g_layer = MOAILayer2D.new()
-	g_layer:setViewport( g_viewport )
+	RENDER_SYSTEM.layer = MOAILayer2D.new()
+	RENDER_SYSTEM.layer:setViewport( RENDER_SYSTEM.viewport )
 
-	MOAISim.pushRenderPass( g_layer )
-end
-
-function runGame()
-	MOAILogMgr.log( "game [" .. GAME_NAME .. "] is starting\n" )
-
-	QUAD_2D_REPOSITORY.init()
-	GAME_STATE_MACHIEN = StateMachine()
-	MENU_GAME_STATE = MenuGameState( g_layer )
-	HELP_GAME_STATE = HelpGameState( g_layer )
-	INPLAY_GAME_STATE = InPlayGameState( g_layer )
-
-	GAME_STATE_MACHIEN:run()
-	GAME_STATE_MACHIEN:setCurrentState( MENU_GAME_STATE )
+	MOAISim.pushRenderPass( RENDER_SYSTEM.layer )
 end
 
 function main()
-	initMOAISim()	
-	runGame()
+	RENDER_SYSTEM.init()	
+	Game.init()
+	Game.run()
 end
 
 main()

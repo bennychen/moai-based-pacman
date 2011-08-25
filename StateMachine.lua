@@ -15,21 +15,30 @@ function StateMachine:run()
 	end
 end
 
+function StateMachine:stop()
+	if ( self.mainThread )
+	then
+		self.mainThread:stop()
+	end
+end
+
 function StateMachine:setCurrentState( state )
 	if ( state and state:is_a( State ) )
 	then
-		if ( state == self.lastState )
+		if ( state == self.currentState )
 		then
 			print( "WARNING @ StateMachine::setCurrentState - " ..
-				   "var [state] is the same as current state" )
+				   "var state [" .. state.name .. "] is the same as current state" )
 			return
 		end
 		self.lastState = self.currentState
 		self.currentState = state
 		if ( self.lastState )
 		then
+			print( "exiting state [" .. self.lastState.name .. "]" )
 			self.lastState:exit()
 		end
+		print( "entering state [" .. self.currentState.name .. "]" )
 		self.currentState:enter()
 	else
 		print( "ERROR @ StateMachine::setCurrentState - " ..
@@ -43,7 +52,6 @@ function StateMachine:updateState()
 		if ( self.currentState ~= nil )
 		then
 			self.currentState:onUpdate()
-			--print( MOAISim:getPerformance() )
 		end
 		coroutine.yield()
 	end

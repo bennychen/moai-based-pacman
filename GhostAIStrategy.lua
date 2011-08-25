@@ -1,7 +1,7 @@
 --
 --------------------------------------------------------------------------------
---         FILE:  Vector2.lua
---        USAGE:  ./Vector2.lua 
+--         FILE:  GhostAIStrategy.lua
+--        USAGE:  ./GhostAIStrategy.lua 
 --  DESCRIPTION:  
 --      OPTIONS:  ---
 -- REQUIREMENTS:  ---
@@ -10,23 +10,20 @@
 --       AUTHOR:   (), <>
 --      COMPANY:  
 --      VERSION:  1.0
---      CREATED:  08/14/2011 22:09:43 CST
+--      CREATED:  08/23/2011 15:22:40 CST
 --     REVISION:  ---
 --------------------------------------------------------------------------------
 --
 
-require "class"
+GhostAIStrategy = class()
 
-Vector2 = class()
-
-function Vector2:init( x, y )
-	self.x = x
-	self.y = y
+function GhostAIStrategy:init( gameMap, pacman )
+	self.gameMap = gameMap
+	self.pacman = pacman
 end
 
-function Vector2:add( vec2 )
-	self.x = self.x + vec2.x
-	self.y = self.y + vec2.y
+function GhostAIStrategy:getPursueDirection( ghost )
 end
 
---TODO: add more functions for Vector2
+function GhostAIStrategy:getEvadeDirection( ghost )
+end

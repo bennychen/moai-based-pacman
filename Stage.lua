@@ -1,7 +1,7 @@
 --
 --------------------------------------------------------------------------------
---         FILE:  Vector2.lua
---        USAGE:  ./Vector2.lua 
+--         FILE:  Stage.lua
+--        USAGE:  ./Stage.lua 
 --  DESCRIPTION:  
 --      OPTIONS:  ---
 -- REQUIREMENTS:  ---
@@ -10,23 +10,14 @@
 --       AUTHOR:   (), <>
 --      COMPANY:  
 --      VERSION:  1.0
---      CREATED:  08/14/2011 22:09:43 CST
+--      CREATED:  08/24/2011 17:27:00 CST
 --     REVISION:  ---
 --------------------------------------------------------------------------------
 --
 
-require "class"
+GHOST_EVADE_DURATION = 5 --TODO
 
-Vector2 = class()
-
-function Vector2:init( x, y )
-	self.x = x
-	self.y = y
-end
-
-function Vector2:add( vec2 )
-	self.x = self.x + vec2.x
-	self.y = self.y + vec2.y
-end
-
---TODO: add more functions for Vector2
+GHOST_BLUE_STRATEGY = GHOST_AI_RANDOM
+GHOST_RED_STRATEGY = GHOST_AI_RANDOM
+GHOST_GREEN_STRATEGY = GHOST_AI_RANDOM
+GHOST_RED_STRATEGY = GHOST_AI_RANDOM

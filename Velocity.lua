@@ -15,6 +15,8 @@
 --------------------------------------------------------------------------------
 --
 
+require "class" 
+
 DIRECTION_LOWER_BOUND = 0
 DIRECTION_LEFT = 1
 DIRECTION_UP = 2
@@ -83,4 +85,31 @@ function Velocity.isReversedDirection( direction1, direction2 )
 	else
 		print( "ERROR @ Velocity:isReversedDirection - failed, invalid direction" )
 	end
+end
+
+function Velocity.getReversedDirection( direction )
+	if ( direction == DIRECTION_LEFT or direction == DIRECTION_RIGHT )
+	then
+		return 4 - direction
+	elseif ( direction == DIRECTION_UP or direction == DIRECTION_DOWN )
+	then
+		return 6 - direction
+	end
+end
+
+function Velocity.getDirectionString( direction )
+	if ( direction == DIRECTION_LEFT )
+	then
+		return "left"
+	elseif ( direction == DIRECTION_UP )
+	then
+		return "up"
+	elseif ( direction == DIRECTION_RIGHT )
+	then
+		return "right"
+	elseif ( direction == DIRECTION_DOWN )
+	then
+		return "down"
+	end
+	return "unknow"
 end

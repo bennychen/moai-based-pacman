@@ -18,46 +18,112 @@
 require "State"
 require "GameMap"
 require "Pacman"
+require "Ghost"
+require "CollisionDetection"
 
 InPlayGameState = class( State )
 
 function InPlayGameState:init( layer )
+	State.init( self, "InPlayGameState" )
+
 	self.layer = layer
-	self.gameMap = GameMap()
-	local pacmanSpawnPoint = Vector2( 14, 24 )
-	local pacmanSpawnDirection = DIRECTION_LEFT
-	local pacmanSpeed = tileSize * 5
-	self.pacman = Pacman( self.gameMap.leftTopCorner, 
-			pacmanSpawnPoint, pacmanSpawnDirection, pacmanSpeed )
+	self.gameMap = GAME_MAP
+	self.pacman = ENTITY_MANAGER:getEntity( PACMAN_ID )
+	self.blueGhost = ENTITY_MANAGER:getEntity( GHOST_ID_BLUE )
+	self.redGhost = ENTITY_MANAGER:getEntity( GHOST_ID_RED )
+	self.greenGhost = ENTITY_MANAGER:getEntity( GHOST_ID_GREEN )
+	self.yellowGhost = ENTITY_MANAGER:getEntity( GHOST_ID_YELLOW )
 end
 
 function InPlayGameState:enter()
-	print( "entering InPlayGameState..." )
+	self.gameMap:show( self.layer )
 
-	self.gameMap:drawMap( self.layer )
-	self.pacman:resetToSpawn()
-	self.pacman:show( self.layer )
-	self.pacman:startMovingAnimation()
+	self.pacman:startMoving()
 
+	self.blueGhost:setAIStrategy( GHOST_AI_RANDOM )
+	self.redGhost:setAIStrategy( GHOST_AI_RANDOM )
+	self.greenGhost:setAIStrategy( GHOST_AI_CHASER )
+	self.yellowGhost:setAIStrategy( GHOST_AI_CHASER )
+
+	self.blueGhost:setStandBy()
+	self.redGhost:setStandBy()
+	self.greenGhost:setStandBy()
+	self.yellowGhost:setStandBy()
+
+	self.entryTime = MOAISim:getElapsedTime()
 	MOAIInputMgr.device.keyboard:setCallback( InPlayGameState.onKeyboardEvent )
 end
 
 function InPlayGameState:exit()
-	print( "exiting InPlayGameState..." )
-
-	self.gameMap:clearMap( self.layer )	
+	self.gameMap:hide( self.layer )	
 	self.pacman:hide( self.layer )
-	self.pacman:stopMovingAnimation()
+	self.pacman:stopCurrentAnimation()
+
+	self.blueGhost:hide( self.layer )
+	self.blueGhost:stopCurrentAnimation()
+	self.redGhost:hide( self.layer )
+	self.redGhost:stopCurrentAnimation()
+	self.greenGhost:hide( self.layer )
+	self.greenGhost:stopCurrentAnimation()
+	self.yellowGhost:hide( self.layer )
+	self.yellowGhost:stopCurrentAnimation()
 
 	MOAIInputMgr.device.keyboard:setCallback( nil )
 end
 
 function InPlayGameState:onUpdate()
-	if ( not self:willPacmanCollideWall( self.pacman.velocity.direction ) )
+	self:launchGhosts()
+	self:updatePacman()
+	self:updateGhosts()
+	self:detectPacmanGhostsCollision()
+	--print( MOAISim:getPerformance() )
+end
+
+function InPlayGameState:launchGhosts()
+	local currentTime = MOAISim:getElapsedTime()
+	local stateElapsedTime = currentTime - self.entryTime
+	if ( self.blueGhost.state == Ghost.STATE_STANDBY and
+		 stateElapsedTime > GHOST_BLUE_STANDBY_TIME )
 	then
+		self.blueGhost:startPursuing()
+	end
+	if ( self.redGhost.state == Ghost.STATE_STANDBY and
+		 stateElapsedTime > GHOST_RED_STANDBY_TIME )
+	then
+		self.redGhost:startPursuing()
+	end
+	if ( self.greenGhost.state == Ghost.STATE_STANDBY and
+		 stateElapsedTime > GHOST_GREEN_STANDBY_TIME )
+	then
+		self.greenGhost:startPursuing()
+	end
+	if ( self.yellowGhost.state == Ghost.STATE_STANDBY and
+		 stateElapsedTime > GHOST_YELLOW_STANDBY_TIME )
+	then
+		self.yellowGhost:startPursuing()
+	end
+end
+
+function InPlayGameState:updatePacman()
+	if ( not CollisionDetection.willPacmanCollideBarrier( self.gameMap, 
+				self.pacman, self.pacman.velocity.direction ) )
+	then
+		if ( self:willPacmanOverBound( self.pacman.velocity.direction ) )
+		then
+			self:crossBound( self.pacman )
+		end
+
 		self.pacman:moveOneFrameBySpeed()
-		self:pacmanTryEatBean()
-		self:pacmanTryEatSuperBean()
+
+		if ( self:pacmanTryEatBean() )
+		then
+			self:onBeanEatten()
+		end
+
+		if ( self:pacmanTryEatSuperBean() )
+		then
+			self:onSuperBeanEatten()
+		end
 	end
 
 	if ( self.pacman.isSeekingPath == true )
@@ -66,58 +132,111 @@ function InPlayGameState:onUpdate()
 	end
 end
 
-function InPlayGameState:seekPathForPacman( desiredDirection )
-	if ( not self:willPacmanCollideWall( self.pacman.desiredDirection ) )
+function InPlayGameState:updateGhosts()
+	self:updateGhost( self.blueGhost )
+	self:updateGhost( self.redGhost )
+	self:updateGhost( self.greenGhost )
+	self:updateGhost( self.yellowGhost )
+end
+
+function InPlayGameState:updateGhost( ghost )
+	if ( not ghost:isActive() )
 	then
-		self.pacman:setDirection( self.pacman.desiredDirection )
+		return
+	end
+	
+	if ( self:willGhostOverBound( ghost, ghost.velocity.direction ) )
+	then
+		self:crossBound( ghost )
+	else
+		ghost:doPathFinding()
+	end
+	if ( self:willGhostCrossBar( ghost, ghost.velocity.direction ) )
+	then
+		ghost.canCrossBar = false
+	end
+	ghost:moveOneFrameBySpeed()
+end
+
+function InPlayGameState:onBeanEatten()
+	if ( self.gameMap:isAllBeansCleared() )
+	then
+		GAME_STATE_MACHINE:setCurrentState( STAGE_CLEARED_GAME_STATE )
+	end
+end
+
+function InPlayGameState:onSuperBeanEatten()
+	GHOST_EVADE_DURATION = 5 --TODO
+	self.blueGhost:startEvading( GHOST_EVADE_DURATION )
+	self.redGhost:startEvading( GHOST_EVADE_DURATION )
+	self.greenGhost:startEvading( GHOST_EVADE_DURATION )
+	self.yellowGhost:startEvading( GHOST_EVADE_DURATION )
+end
+
+function InPlayGameState:seekPathForPacman( desiredDirection )
+	if ( not CollisionDetection.willPacmanCollideBarrier( self.gameMap, 
+				self.pacman, self.pacman.desiredDirection ) )
+	then
+		self.pacman:setDirectionWithAnimation( self.pacman.desiredDirection )
 		self.pacman.isSeekingPath = false
-	elseif ( self:willPacmanCollideWall( self.pacman.velocity.direction ) )
+	elseif ( CollisionDetection.willPacmanCollideBarrier( self.gameMap, 
+				self.pacman, self.pacman.velocity.direction ) )
 	then
 		print( "seek path failed, both current direction and desired direction are not passable" )
 		self.pacman.isSeekingPath = false
 	end
 end
 
-function InPlayGameState:willPacmanCollideWall( direction )
-	local pacmanLeftTopX = 0
-	local pacmanLeftTopY = 0
-	local pacmanRightBottomX = 0
-	local pacmanRightBottomY = 0
-	pacmanLeftTopX, pacmanLeftTopY = self.pacman:getLeftTopLoc() 
-	pacmanRightBottomX, pacmanRightBottomY = 
-		self.pacman:getRightBottomLoc( pacmanLeftTopX, pacmanLeftTopY )
-
-	pacmanSpeed = self.pacman.velocity.speed
-	local displacementX = 0
-	local displacementY = 0
-	local vel = Velocity( pacmanSpeed, direction )
-	displacementX, displacementY = vel:getDisplacement( FRAME_TIME )
-	pacmanLeftTopX = pacmanLeftTopX + displacementX
-	pacmanLeftTopY = pacmanLeftTopY + displacementY
-	pacmanRightBottomX = pacmanRightBottomX + displacementX
-	pacmanRightBottomY = pacmanRightBottomY + displacementY
-
-	return self.gameMap:isCollidingWall( pacmanLeftTopX, pacmanLeftTopY, 
-			pacmanRightBottomX, pacmanRightBottomY )
+function InPlayGameState:detectPacmanGhostsCollision()
+	self:detectPacmanGhostCollision( self.blueGhost )
+	self:detectPacmanGhostCollision( self.redGhost )
+	self:detectPacmanGhostCollision( self.greenGhost )
+	self:detectPacmanGhostCollision( self.yellowGhost )
 end
 
-function InPlayGameState:isPacmanCollidingWall()
-	local pacmanLeftTopX = 0
-	local pacmanLeftTopY = 0
-	local pacmanRightBottomX = 0
-	local pacmanRightBottomY = 0
-	pacmanLeftTopX, pacmanLeftTopY = self.pacman:getLeftTopLoc() 
-	pacmanRightBottomX, pacmanRightBottomY = 
-		self.pacman:getRightBottomLoc( pacmanLeftTopX, pacmanLeftTopY )
-	return self.gameMap:isCollidingWall( pacmanLeftTopX, pacmanLeftTopY, 
-			pacmanRightBottomX, pacmanRightBottomY )
+function InPlayGameState:detectPacmanGhostCollision( ghost )
+	if ( ghost:isActive() and self:isPacmanCollidingGhost( ghost ) )
+	then
+		if ( ghost.state == Ghost.STATE_PURSUE )
+		then
+			GAME_STATE_MACHINE:setCurrentState( PACMAN_KILLED_GAME_STATE )
+		elseif ( ghost.state == Ghost.STATE_EVADE )
+		then
+			ghost:setDead()
+		end
+	end
+end
+
+function InPlayGameState:willGhostCollideWall( ghost, direction )
+	return CollisionDetection.willCollideWall( self.gameMap, ghost, direction )
+end
+
+function InPlayGameState:willPacmanOverBound( direction )
+	return CollisionDetection.willOverBound( self.gameMap, self.pacman, direction )
+end
+
+function InPlayGameState:willGhostCrossBar( ghost, direction )
+	if ( CollisionDetection.isCollidingBar( self.gameMap, ghost ) and 
+		 not CollisionDetection.willCollideBar( self.gameMap, ghost, direction ) )
+	then
+		return true
+	end
+	return false
+end
+
+function InPlayGameState:willGhostOverBound( ghost, direction )
+	return CollisionDetection.willOverBound( self.gameMap, ghost, direction )
+end
+
+function InPlayGameState:isPacmanCollidingGhost( ghost )
+	return CollisionDetection.isEntityColliding( self.pacman, ghost )
 end
 
 function InPlayGameState:pacmanTryEatBean()
 	local pacmanCenterX = 0
 	local pacmanCenterY = 0
 	pacmanCenterX, pacmanCenterY = self.pacman:getCenterLoc()
-	self.gameMap:clearTileBean( 
+	return self.gameMap:clearTileBean( 
 			self.gameMap:getTileIndex( pacmanCenterX, pacmanCenterY ) )
 end
 
@@ -125,8 +244,32 @@ function InPlayGameState:pacmanTryEatSuperBean()
 	local pacmanCenterX = 0
 	local pacmanCenterY = 0
 	pacmanCenterX, pacmanCenterY = self.pacman:getCenterLoc()
-	self.gameMap:clearTileSuperBean( 
+	return self.gameMap:clearTileSuperBean( 
 			self.gameMap:getTileIndex( pacmanCenterX, pacmanCenterY ) )
+end
+
+function InPlayGameState:crossBound( entity )
+	local leftTopX
+	local leftTopY
+	local rightBottomX
+	local rightBottomY
+	
+	leftTopX, leftTopY = entity:getLeftTopLoc()
+	rightBottomX, rightBottomY = entity:getRightBottomLoc( leftTopX, leftTopY )
+
+	if ( rightBottomX < 0 )
+	then
+		entity.prop:addLoc( self.gameMap.width + GAME_ENTITY_SIZE )
+	elseif ( leftTopX > self.gameMap.width )
+	then
+		entity.prop:addLoc( -self.gameMap.width - GAME_ENTITY_SIZE )
+	elseif ( rightBottomY < 0 )
+	then
+		entity.prop:addLoc( self.gameMap.height + GAME_ENTITY_SIZE )
+	elseif ( leftTopY > self.gameMap.height )
+	then
+		entity.prop:addLoc( -self.gameMap.height - GAME_ENTITY_SIZE )
+	end
 end
 
 function InPlayGameState:tryChangePacmanDirection( direction )
@@ -135,12 +278,13 @@ function InPlayGameState:tryChangePacmanDirection( direction )
 		return
 	end
 
-	if ( self:willPacmanCollideWall( direction ) )
+	if ( CollisionDetection.willPacmanCollideBarrier( self.gameMap, 
+				self.pacman, direction ) )
 	then
 		self.pacman.desiredDirection = direction
 		self.pacman.isSeekingPath = true
 	else
-		self.pacman:setDirection( direction )
+		self.pacman:setDirectionWithAnimation( direction )
 	end
 end
 
@@ -168,3 +312,4 @@ function InPlayGameState.onKeyboardEvent( key, down )
 	end
 
 end
+
