@@ -55,16 +55,17 @@ function GameMap:init()
 end
 
 function GameMap:resetMap()
+	for i = TILE_MAP_ITEM_EMPTY, TILE_MAP_ITEM_BAR
+	do
+		self.itemNum[i] = 0
+	end
+
 	for i = 1, map.height
 	do
 		for j = 1, map.width
 		do
 			local tileData = self.mapData[( i - 1 ) * map.width + j]
 			self.tileGrid:setTile( j, i, tileData )
-			if ( self.itemNum[tileData] == nil )
-			then
-				self.itemNum[tileData] = 0
-			end
 			self.itemNum[tileData] = self.itemNum[tileData] + 1
 		end
 	end
@@ -180,7 +181,7 @@ function GameMap:isTileOverBound( tileX, tileY )
 end
 
 function GameMap:isAllBeansCleared()
-	return self.itemNum[ TILE_MAP_ITEM_BEAN ] <= 0
+	return self.itemNum[ TILE_MAP_ITEM_BEAN ] <= 200--0
 end
 
 function GameMap:clearTileBean( tileX, tileY )

@@ -47,6 +47,13 @@ function QUAD_2D_REPOSITORY.init()
 	QUAD_2D_WIN:setRect( -winPicWidth / 2, winPicHeight / 2,
 						  winPicWidth / 2, -winPicHeight / 2 )
 
+	pausePicWidth = 200
+	pausePicHeight = 40
+	QUAD_2D_PAUSE = MOAIGfxQuad2D.new()
+	QUAD_2D_PAUSE:setTexture( "media/pause.png" )
+	QUAD_2D_PAUSE:setRect( -pausePicWidth / 2, pausePicHeight / 2,
+							pausePicWidth / 2, -pausePicHeight / 2 )
+
 	beanWidth = TILE_SIZE
 	beanHeight = TILE_SIZE
 	QUAD_2D_BEAN = MOAIGfxQuad2D.new()

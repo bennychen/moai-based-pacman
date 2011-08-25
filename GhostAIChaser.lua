@@ -32,7 +32,7 @@ function GhostAIChaser:getPursueDirection( ghost )
 	for direction = DIRECTION_LEFT, DIRECTION_DOWN
 	do
 		if ( ( not Velocity.isReversedDirection( direction, ghostDirection ) ) and
-			 ( not CollisionDetection.willCollideWall( self.gameMap, ghost, direction ) ) )
+			 ( not CollisionDetection.willGhostCollideBarrier( self.gameMap, ghost, direction ) ) )
 		then
 			if ( self:isDirectionApproachignPacman( direction, ghost ) )
 			then
@@ -73,7 +73,7 @@ function GhostAIChaser:getEvadeDirection( ghost )
 	for direction = DIRECTION_LEFT, DIRECTION_DOWN
 	do
 		if ( ( not Velocity.isReversedDirection( direction, ghostDirection ) ) and
-			 ( not CollisionDetection.willCollideWall( self.gameMap, ghost, direction ) ) )
+			 ( not CollisionDetection.willGhostCollideBarrier( self.gameMap, ghost, direction ) ) )
 		then
 			if ( self:isDirectionLeavingPacman( direction, ghost ) )
 			then
@@ -86,21 +86,20 @@ function GhostAIChaser:getEvadeDirection( ghost )
 		end
 	end
 	
-	if ( directionNum == 1 )
+	if ( highPrioNum == 1 )
 	then
-		return directions[1]
-	elseif ( directionNum > 1 )
+		return highPrioDirections[1]
+	elseif ( highPrioNum > 1 )
 	then
-		local index = math.random( 1, directionNum )
-		--print( "ghost's current direction - " .. Velocity.getDirectionString( ghostDirection ) )
-		--printVar( directionNum, 'directionNum')
-		--for i = 1, directionNum do print( "["..i.."] - direction is " .. Velocity.getDirectionString( directions[i] ) ) end
-		--print( "need a choice for direction, choose - " .. Velocity.getDirectionString( directions[index] ) )
-		return directions[index]
-	elseif ( directionNum == 0 )
-	then
-		--print( "ghost's current direction - " .. Velocity.getDirectionString( ghostDirection ) )
-		return Velocity.getReversedDirection( ghostDirection )
+		local index = math.random( 1, highPrioNum )
+		return highPrioDirections[index]
+	else
+		if ( lowPrioNum == 0 )
+		then
+			print( "ERROR @ GhostAIStupid:getStupidDirection - not possible to be here" )
+			return Velocity.getReversedDirection( ghostDirection )
+		end
+		return lowPrioDirections[1]
 	end
 end
 
@@ -121,7 +120,21 @@ function GhostAIChaser:isDirectionApproachignPacman( direction, ghost )
 	return ( distanceX * displacementX > 0 or distanceY * displacementY > 0 )
 end
 
-function GhostAIChaser:isDirectionLeavingPacman( direction )
+function GhostAIChaser:isDirectionLeavingPacman( direction, ghost )
+	local displacementX
+	local displacementY
+	local vel = Velocity( 10, direction )
+	displacementX, displacementY = vel:getDisplacement( direction, 1 )
+	
+	local pacmanX
+	local pacmanY
+	local ghostX
+	local ghostY
+	pacmanX, pacmanY = self.pacman:getLeftTopLoc()
+	ghostX, ghostY = ghost:getLeftTopLoc()
+	local distanceX = pacmanX - ghostX
+	local distanceY = pacmanY - ghostY
+	return ( distanceX * displacementX < 0 or distanceY * displacementY < 0 )
 end
 
 GHOST_AI_CHASER = nil

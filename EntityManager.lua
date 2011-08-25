@@ -23,6 +23,7 @@ end
 
 function EntityManager:addEntity( id, entity )
 	self.entityGroup[id] = entity
+	entity.id = id
 end
 
 function EntityManager:getEntity( id )

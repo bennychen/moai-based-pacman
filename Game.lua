@@ -16,16 +16,20 @@
 --
 
 require "GameConfig"
+require "GameTime"
 require "MenuGameState"
 require "HelpGameState"
 require "StageIntroGameState"
 require "InPlayGameState"
+require "PauseGameState"
 require "PacmanKilledGameState"
+require "GhostKilledGameState"
 require "StageClearedGameState"
 require "StateMachine"
 require "Quad2DRepository"
 require "EntityManager"
 require "GameMap"
+require "GhostScheduler"
 require "GhostAIStupid"
 require "GhostAIRandom"
 require "GhostAIChaser"
@@ -33,10 +37,12 @@ require "GhostAIChaser"
 Game = {}
 
 function Game.init()
-	QUAD_2D_REPOSITORY.init()
+	GAME_TIME = GameTime()
 
+	QUAD_2D_REPOSITORY.init()
 	GAME_MAP = GameMap()
 	ENTITY_MANAGER = EntityManager()
+	GHOST_SCHEDULER = GhostScheduler()
 	Game.initGameEntities()
 
 	local pacman = ENTITY_MANAGER:getEntity( PACMAN_ID )
@@ -50,11 +56,14 @@ function Game.init()
 	STAGE_INTRO_GAME_STATE = StageIntroGameState( RENDER_SYSTEM.layer )
 	INPLAY_GAME_STATE = InPlayGameState( RENDER_SYSTEM.layer )
 	PACMAN_KILLED_GAME_STATE = PacmanKilledGameState( RENDER_SYSTEM.layer )
+	GHOST_KILLED_GAME_STATE = GhostKilledGameState( RENDER_SYSTEM.layer )
 	STAGE_CLEARED_GAME_STATE = StageClearedGameState( RENDER_SYSTEM.layer )
+	PAUSE_GAME_STATE = PauseGameState( RENDER_SYSTEM.layer )
 end
 
 function Game.run()
 	MOAILogMgr.log( "game [" .. GAME_NAME .. "] is starting\n" )
+	GAME_TIME:start()
 	GAME_STATE_MACHINE:run()
 	GAME_STATE_MACHINE:setCurrentState( MENU_GAME_STATE )
 end
@@ -64,7 +73,6 @@ function Game.initGameEntities()
 			PACMAN_SPAWN_POINT, PACMAN_SPAWN_DIRECTION, PACMAN_SPEED,
 			TILE_DECK_2D_PACMAN, pacmanSpriteNum )
 	ENTITY_MANAGER:addEntity( PACMAN_ID, pacman )
-	print( PACMAN_SPAWN_DIRECTION )
 
 	local blueGhost = Ghost( GAME_MAP.leftTopCorner,
 			GHOST_BLUE_SPAWN_POINT, GHOST_BLUE_SPAWN_DIRECTION, 

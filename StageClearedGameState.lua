@@ -31,8 +31,8 @@ function StageClearedGameState:init( layer )
 end
 
 function StageClearedGameState:enter()
+	GAME_TIME:pause()
 	self.gameMap:show( self.layer )
-
 	self.layer:insertProp( self.winProp )
 	self.entryTime = MOAISim:getElapsedTime()
 end

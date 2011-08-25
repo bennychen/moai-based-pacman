@@ -36,19 +36,20 @@ function InPlayGameState:init( layer )
 end
 
 function InPlayGameState:enter()
+	GAME_TIME:resume()
 	self.gameMap:show( self.layer )
-
+	
+	self.pacman:show( self.layer )
 	self.pacman:startMoving()
 
-	self.blueGhost:setAIStrategy( GHOST_AI_RANDOM )
-	self.redGhost:setAIStrategy( GHOST_AI_RANDOM )
-	self.greenGhost:setAIStrategy( GHOST_AI_CHASER )
-	self.yellowGhost:setAIStrategy( GHOST_AI_CHASER )
-
-	self.blueGhost:setStandBy()
-	self.redGhost:setStandBy()
-	self.greenGhost:setStandBy()
-	self.yellowGhost:setStandBy()
+	self.blueGhost:show( self.layer )
+	self.blueGhost:startCurentAnimation()
+	self.redGhost:show( self.layer )
+	self.redGhost:startCurentAnimation()
+	self.greenGhost:show( self.layer )
+	self.greenGhost:startCurentAnimation()
+	self.yellowGhost:show( self.layer )
+	self.yellowGhost:startCurentAnimation()
 
 	self.entryTime = MOAISim:getElapsedTime()
 	MOAIInputMgr.device.keyboard:setCallback( InPlayGameState.onKeyboardEvent )
@@ -72,36 +73,11 @@ function InPlayGameState:exit()
 end
 
 function InPlayGameState:onUpdate()
-	self:launchGhosts()
+	GHOST_SCHEDULER:updateSchedules()
 	self:updatePacman()
 	self:updateGhosts()
 	self:detectPacmanGhostsCollision()
 	--print( MOAISim:getPerformance() )
-end
-
-function InPlayGameState:launchGhosts()
-	local currentTime = MOAISim:getElapsedTime()
-	local stateElapsedTime = currentTime - self.entryTime
-	if ( self.blueGhost.state == Ghost.STATE_STANDBY and
-		 stateElapsedTime > GHOST_BLUE_STANDBY_TIME )
-	then
-		self.blueGhost:startPursuing()
-	end
-	if ( self.redGhost.state == Ghost.STATE_STANDBY and
-		 stateElapsedTime > GHOST_RED_STANDBY_TIME )
-	then
-		self.redGhost:startPursuing()
-	end
-	if ( self.greenGhost.state == Ghost.STATE_STANDBY and
-		 stateElapsedTime > GHOST_GREEN_STANDBY_TIME )
-	then
-		self.greenGhost:startPursuing()
-	end
-	if ( self.yellowGhost.state == Ghost.STATE_STANDBY and
-		 stateElapsedTime > GHOST_YELLOW_STANDBY_TIME )
-	then
-		self.yellowGhost:startPursuing()
-	end
 end
 
 function InPlayGameState:updatePacman()
@@ -149,7 +125,7 @@ function InPlayGameState:updateGhost( ghost )
 	then
 		self:crossBound( ghost )
 	else
-		ghost:doPathFinding()
+		ghost:update()
 	end
 	if ( self:willGhostCrossBar( ghost, ghost.velocity.direction ) )
 	then
@@ -161,19 +137,23 @@ end
 function InPlayGameState:onBeanEatten()
 	if ( self.gameMap:isAllBeansCleared() )
 	then
+		print( "all beans are eatten" )
 		GAME_STATE_MACHINE:setCurrentState( STAGE_CLEARED_GAME_STATE )
 	end
 end
 
 function InPlayGameState:onSuperBeanEatten()
-	GHOST_EVADE_DURATION = 5 --TODO
-	self.blueGhost:startEvading( GHOST_EVADE_DURATION )
-	self.redGhost:startEvading( GHOST_EVADE_DURATION )
-	self.greenGhost:startEvading( GHOST_EVADE_DURATION )
-	self.yellowGhost:startEvading( GHOST_EVADE_DURATION )
+	self.blueGhost:performSpell( GHOST_EVADE_DURATION )
+	self.redGhost:performSpell( GHOST_EVADE_DURATION )
+	self.greenGhost:performSpell( GHOST_EVADE_DURATION )
+	self.yellowGhost:performSpell( GHOST_EVADE_DURATION )
 end
 
 function InPlayGameState:seekPathForPacman( desiredDirection )
+	if ( self:willPacmanOverBound( self.pacman.velocity.direction ) )
+	then
+		return
+	end
 	if ( not CollisionDetection.willPacmanCollideBarrier( self.gameMap, 
 				self.pacman, self.pacman.desiredDirection ) )
 	then
@@ -202,7 +182,8 @@ function InPlayGameState:detectPacmanGhostCollision( ghost )
 			GAME_STATE_MACHINE:setCurrentState( PACMAN_KILLED_GAME_STATE )
 		elseif ( ghost.state == Ghost.STATE_EVADE )
 		then
-			ghost:setDead()
+			GHOST_KILLED_GAME_STATE:setCurrentKilledGhost( ghost )
+			GAME_STATE_MACHINE:setCurrentState( GHOST_KILLED_GAME_STATE )
 		end
 	end
 end
@@ -292,7 +273,7 @@ end
 INPLAY_GAME_STATE = nil
 
 function InPlayGameState.onKeyboardEvent( key, down )
-	if ( INPLAY_GAME_STATE == nil or up )
+	if ( INPLAY_GAME_STATE == nil or down == false )
 	then
 		return
 	end
@@ -309,6 +290,9 @@ function InPlayGameState.onKeyboardEvent( key, down )
 	elseif ( key == KEYBOARD_L )
 	then
 		INPLAY_GAME_STATE:tryChangePacmanDirection( DIRECTION_RIGHT )
+	elseif ( key == KEYBOARD_ESC )
+	then
+		GAME_STATE_MACHINE:setCurrentState( PAUSE_GAME_STATE )
 	end
 
 end

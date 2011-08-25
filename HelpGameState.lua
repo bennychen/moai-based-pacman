@@ -27,6 +27,7 @@ function HelpGameState:init( layer )
 end
 
 function HelpGameState:enter()
+	GAME_TIME:pause()
 	self.layer:insertProp( self.help )
 end
 

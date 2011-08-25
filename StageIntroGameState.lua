@@ -36,10 +36,17 @@ function StageIntroGameState:init( layer )
 end
 
 function StageIntroGameState:enter()
+	GAME_TIME:pause()
+
 	self.gameMap:show( self.layer )
 
 	self.pacman:resetToSpawn()
 	self.pacman:show( self.layer )
+
+	self.blueGhost:setAIStrategy( GHOST_AI_RANDOM )
+	self.redGhost:setAIStrategy( GHOST_AI_RANDOM )
+	self.greenGhost:setAIStrategy( GHOST_AI_CHASER )
+	self.yellowGhost:setAIStrategy( GHOST_AI_CHASER )
 
 	self.blueGhost:resetToSpawn()
 	self.blueGhost:show( self.layer )
@@ -49,6 +56,16 @@ function StageIntroGameState:enter()
 	self.greenGhost:show( self.layer )
 	self.yellowGhost:resetToSpawn()
 	self.yellowGhost:show( self.layer )
+	self.blueGhost:setStandBy()
+	self.redGhost:setStandBy()
+	self.greenGhost:setStandBy()
+	self.yellowGhost:setStandBy()
+
+	GHOST_SCHEDULER:clearSchedules()
+	GHOST_SCHEDULER:addSchedule( GHOST_ID_BLUE, GHOST_BLUE_STANDBY_TIME )
+	GHOST_SCHEDULER:addSchedule( GHOST_ID_RED, GHOST_RED_STANDBY_TIME )
+	GHOST_SCHEDULER:addSchedule( GHOST_ID_GREEN, GHOST_GREEN_STANDBY_TIME )
+	GHOST_SCHEDULER:addSchedule( GHOST_ID_YELLOW, GHOST_YELLOW_STANDBY_TIME )
 
 	self.layer:insertProp( self.readyProp )
 	self.entryTime = MOAISim:getElapsedTime()

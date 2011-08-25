@@ -52,7 +52,22 @@ function Pacman:setDirectionWithAnimation( direction )
 		self.velocity:setDirection( direction )
 		self.animatable:startAnimation( direction )
 	else
-		print( "ERROR @ Pacman:setDirection - failed, invalid direction" )
+		print( "ERROR @ Pacman:setDirectionWithAnimation - failed, invalid direction" )
+	end
+end
+
+function Pacman:setDirection( direction )
+	if ( Velocity.isValidDirection( direction ) )
+	then
+		if ( direction == self.velocity.direction )
+		then
+			return
+		end
+
+		self.velocity:setDirection( direction )
+		self.animatable:setCurrentAnimation( direction )
+	else
+		print( "ERROR @ Pacman:setDirectionWithAnimation - failed, invalid direction" )
 	end
 end
 

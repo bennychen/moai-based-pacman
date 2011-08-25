@@ -86,6 +86,11 @@ function Animatable:getAnimation( animName )
 end
 
 function Animatable:startAnimation( animName )
+	self:setCurrentAnimation( animName )
+	self.animationGroup[animName]:start()
+end
+
+function Animatable:setCurrentAnimation( animName )
 	if ( self.animationGroup[animName] == nil ) then
 		print( "ERROR @ Animatable:startAnimation - animation [" 
 				.. animName .. "] doesn't exists." )
@@ -93,7 +98,6 @@ function Animatable:startAnimation( animName )
 	end
 	self:stopCurrentAnimation()
 	self.prop:setIndex( self.animationGroup[animName].beginDeckIndex )
-	self.animationGroup[animName]:start()
 	self.currentAnim = animName
 end
 
@@ -104,13 +108,18 @@ function Animatable:stopAnimation( animName )
 		return false
 	end
 	self.animationGroup[animName]:stop()
-	self.currentAnim = nil
+end
+
+function Animatable:startCurentAnimation()
+	if ( self.currentAnim ~= nil )
+	then
+		self:startAnimation( self.currentAnim )
+	end
 end
 
 function Animatable:stopCurrentAnimation()
 	if ( self.currentAnim ~= nil )
 	then
 		self:stopAnimation( self.currentAnim )
-		self.currentAnim = nil
 	end
 end

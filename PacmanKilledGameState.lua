@@ -29,6 +29,7 @@ function PacmanKilledGameState:init( layer )
 end
 
 function PacmanKilledGameState:enter()
+	GAME_TIME:pause()
 	self.gameMap:show( self.layer )
 	self.pacman:show( self.layer )
 	self.pacman:setDead()

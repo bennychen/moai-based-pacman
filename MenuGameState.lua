@@ -39,6 +39,7 @@ function MenuGameState:init( layer )
 end
 
 function MenuGameState:enter()
+	GAME_TIME:pause()
 	self.layer:insertProp( self.menu )
 	self.layer:insertProp( self.cursor )
 	self.cursorIndex = MenuGameState.MENU_ITEM_START_GAME

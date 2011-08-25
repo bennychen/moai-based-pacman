@@ -7,7 +7,7 @@
 -- REQUIREMENTS:  ---
 --         BUGS:  ---
 --        NOTES:  ---
---       AUTHOR:   (), <>
+--       AUTHOR:   (Benny Chen), <rockerbenny@gmail.com>
 --      COMPANY:  
 --      VERSION:  1.0
 --      CREATED:  08/22/2011 14:15:05 CST
@@ -41,7 +41,7 @@ end
 
 function Ghost:initAnimation()
 	self.animatable:addAnimation( Ghost.ANIM_PURSUE, 1, 2, 0.30, MOAIEaseType.FLAT, MOAITimer.LOOP )
-	self.animatable:addAnimation( Ghost.ANIM_BLINK, 2, 3, 0.20, MOAIEaseType.FLAT, MOAITimer.LOOP )
+	self.animatable:addAnimation( Ghost.ANIM_BLINK, 2, 3, 0.30, MOAIEaseType.FLAT, MOAITimer.LOOP )
 	self.animatable:addAnimation( Ghost.ANIM_EVADE, 3, 4, 0.30, MOAIEaseType.FLAT, MOAITimer.LOOP )
 	self.animatable:addAnimation( Ghost.ANIM_DYING, 5, 7, 0.30, MOAIEaseType.FLAT, MOAITimer.NORMAL )
 end
@@ -51,13 +51,44 @@ function Ghost:setStandBy()
 	self.velocity.speed = 0
 	self.animatable:startAnimation( Ghost.ANIM_PURSUE )
 	self.canCrossBar = true
+	self.isSpellTiming = false
+end
+
+function Ghost:launch()
+	if ( self.state == Ghost.STATE_STANDBY )
+	then
+		if ( self.animatable.currentAnim == Ghost.ANIM_PURSUE )
+		then
+			self:startPursuing()
+		elseif ( self.animatable.currentAnim == Ghost.ANIM_EVADE )
+		then
+			self:startEvading()
+		end
+	end
+end
+
+function Ghost:performSpell( spellTime )
+	if ( self.state == Ghost.STATE_STANDBY )
+	then
+		self:startEvadeAnimation()
+	else
+		self:startEvading()
+	end
+	self:startSpellTiming( spellTime )
 end
 
 function Ghost:startPursuing()
 	self.state = Ghost.STATE_PURSUE
 	self.velocity.speed = self.pursueSpeed
-	self.animatable:startAnimation( Ghost.ANIM_PURSUE )
 	self:adjustPosition()
+	self:startPursueAnimation()
+end
+
+function Ghost:startEvading( evadeDuration )
+	self.state = Ghost.STATE_EVADE
+	self.velocity.speed = self.evadeSpeed
+	--self:adjustPosition()
+	self:startEvadeAnimation()
 end
 
 function Ghost:startBlinking()
@@ -67,20 +98,34 @@ function Ghost:startBlinking()
 	end
 end
 
-function Ghost:startEvading( evadeDuration )
-	self.state = Ghost.STATE_EVADE
-	self.velocity.speed = self.evadeSpeed
-	self.animatable:startAnimation( Ghost.ANIM_EVADE )
-	self.animatable:startAnimation( Ghost.ANIM_BLINK )
+function Ghost:startPursueAnimation()
+	self.animatable:startAnimation( Ghost.ANIM_PURSUE )
+end
 
-	self.evadeDuration = evadeDuration
-	self.evadeStartTime = MOAISim:getElapsedTime()
+function Ghost:startEvadeAnimation()
+	self.animatable:startAnimation( Ghost.ANIM_EVADE )
+end
+
+function Ghost:startSpellTiming( spellDuration )
+	self.isSpellTiming = true
+	self.spellDuration = spellDuration
+	self.spellStartTime = GAME_TIME.elapsedTime
+end
+
+function Ghost:stopSpellTimng()
+	self.isSpellTiming = false
+end
+
+function Ghost:isDead()
+	return self.state == Ghost.STATE_DEAD
 end
 
 function Ghost:setDead()
+	print( "ghost ["..self.id.."] is dead" )
 	self.state = Ghost.STATE_DEAD
 	self.velocity.speed = 0
 	self.animatable:startAnimation( Ghost.ANIM_DYING )
+	self:stopSpellTimng()
 end
 
 function Ghost:isActive()
@@ -97,41 +142,47 @@ function Ghost:setAIStrategy( strategy )
 	end
 end
 
-function Ghost:doPathFinding()
-	if ( self.state == Ghost.STATE_PURSUE )
+function Ghost:update()
+	self:updateSpellTiming()
+	self:doPathFinding()
+end
+
+function Ghost:updateSpellTiming()
+	if ( self.isSpellTiming == true )
 	then
-		self:setPursueDirection()
-	elseif ( self.state == Ghost.STATE_EVADE )
-	then
-		local currentTime = MOAISim:getElapsedTime()
-		local evadeElapsedTime = currentTime - self.evadeStartTime
-		if ( evadeElapsedTime > self.evadeDuration )
+		local currentTime = GAME_TIME.elapsedTime
+		local spellElapsedTime = currentTime - self.spellStartTime
+		if ( spellElapsedTime > self.spellDuration )
 		then
-			self:startPursuing()
+			if ( self.state == Ghost.STATE_STANDBY )
+			then
+				self:startPursueAnimation()
+			elseif ( self.state == Ghost.STATE_EVADE )
+			then
+				self:startPursuing()
+			end
+			self:stopSpellTimng()
 		else
-			local evadeRemainingTime = self.evadeDuration - evadeElapsedTime
-			if ( math.abs( evadeRemainingTime - 5 ) < FRAME_TIME )
+			local spellRemainingTime = self.spellDuration - spellElapsedTime
+			if ( math.abs( spellRemainingTime - 5 ) < FRAME_TIME )
 			then
 				self:startBlinking()
 			end
-			self:setEvadeDirection()
 		end
 	end
 end
 
-function Ghost:setPursueDirection()
-	if ( self.aiStrategy ~= nil )
+function Ghost:doPathFinding()
+	if ( self.aiStrategy == nil )
 	then
-		local direction = self.aiStrategy:getPursueDirection( self )
-		self:setDirection( direction )
+		return
 	end
-end
-
-function Ghost:setEvadeDirection()
-	if ( self.aiStrategy ~= nil )
+	if ( self.state == Ghost.STATE_PURSUE )
 	then
-		local direction = self.aiStrategy:getPursueDirection( self )
-		self:setDirection( direction )
+		self:setDirection( self.aiStrategy:getPursueDirection( self ) )
+	elseif ( self.state == Ghost.STATE_EVADE )
+	then
+		self:setDirection( self.aiStrategy:getEvadeDirection( self ) )
 	end
 end
 

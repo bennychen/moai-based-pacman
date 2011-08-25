@@ -28,8 +28,6 @@ function GameEntity:init( parentTransform, spawnPoint, spawnDirection, speed, ti
 	self.spawnPoint = spawnPoint
 	self.spawnDirection = spawnDirection
 	self.velocity = Velocity( speed, spawnDirection )
-
-	self.stateMachine = StateMachine() --TODO: think about whether this is necessary
 end
 
 function GameEntity:moveOneFrameBySpeed()
@@ -86,8 +84,8 @@ function GameEntity:resetToSpawn( layer )
 	self:setDirection( self.spawnDirection )
 end
 
-function GameEntity:setCurrentState( state )
-	self.stateMachine:setCurrentState( state )
+function GameEntity:startCurentAnimation()
+	self.animatable:startCurentAnimation()
 end
 
 function GameEntity:stopCurrentAnimation()
