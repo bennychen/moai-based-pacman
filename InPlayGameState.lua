@@ -137,7 +137,6 @@ end
 function InPlayGameState:onBeanEatten()
 	if ( self.gameMap:isAllBeansCleared() )
 	then
-		print( "all beans are eatten" )
 		GAME_STATE_MACHINE:setCurrentState( STAGE_CLEARED_GAME_STATE )
 	end
 end
