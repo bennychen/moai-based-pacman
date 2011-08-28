@@ -181,7 +181,7 @@ function GameMap:isTileOverBound( tileX, tileY )
 end
 
 function GameMap:isAllBeansCleared()
-	return self.itemNum[ TILE_MAP_ITEM_BEAN ] <= 200--0
+	return self.itemNum[ TILE_MAP_ITEM_BEAN ] <= 0
 end
 
 function GameMap:clearTileBean( tileX, tileY )
