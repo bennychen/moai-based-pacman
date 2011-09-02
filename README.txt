@@ -9,3 +9,7 @@ All in all, I programmed Moai-based Pacman for fun and share my code, related ga
 --------Project Structure--------
 media - all the game assets
 docs - class diagram, state diagram, etc.
+
+--------How to Play----------
+Menu - press 'Enter' to enter game
+Game - use J,K,L,I to move Pacman
