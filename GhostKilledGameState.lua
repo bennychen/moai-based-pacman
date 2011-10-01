@@ -49,18 +49,19 @@ function GhostKilledGameState:enter()
 
 	if ( self.killedGhost ~= nil )
 	then
+		ghostDeadSound:play()
 		self.killedGhost:setDead()
-		self.entryTime = MOAISim:getElapsedTime()
+		--self.entryTime = MOAISim:getElapsedTime()
 	end
 end
 
 function GhostKilledGameState:onUpdate()
 	if ( self.killedGhost ~= nil )
 	then
-		local currentTime = MOAISim:getElapsedTime()
-		local elapsedTime = currentTime - self.entryTime
+		--local currentTime = MOAISim:getElapsedTime()
+		--local elapsedTime = currentTime - self.entryTime
 		local dyingAnim = self.killedGhost.animatable:getAnimation( Ghost.ANIM_DYING )
-		if ( dyingAnim:isDone() and elapsedTime > GHOST_DEAD_DURATION )
+		if ( dyingAnim:isDone() and not ghostDeadSound:isPlaying() )--and elapsedTime > GHOST_DEAD_DURATION )
 		then
 			GAME_STATE_MACHINE:setCurrentState( INPLAY_GAME_STATE )
 		end

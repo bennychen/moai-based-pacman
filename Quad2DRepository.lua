@@ -20,14 +20,14 @@ require "media/tiledmap2"
 QUAD_2D_REPOSITORY = {}
 
 function QUAD_2D_REPOSITORY.init()
-	menuWidth = 560 / 2
-	menuHeight = 560 / 2
+	menuWidth = 560
+	menuHeight = 560
 	QUAD_2D_MENU = MOAIGfxQuad2D.new()
 	QUAD_2D_MENU:setTexture( "media/mainmenu.png" )
 	QUAD_2D_MENU:setRect( -menuWidth/2, menuHeight/2, menuWidth/2, -menuHeight/2 )
 
-	helpWindowWidth = 400 / 2
-	helpWindowHeight = 300 / 2
+	helpWindowWidth = 400
+	helpWindowHeight = 300
 	QUAD_2D_HELP_WINDOW = MOAIGfxQuad2D.new()
 	QUAD_2D_HELP_WINDOW:setTexture( "media/helpmenu.png" )
 	QUAD_2D_HELP_WINDOW:setRect( -helpWindowWidth/2, helpWindowHeight/2, 
@@ -70,35 +70,48 @@ function QUAD_2D_REPOSITORY.init()
 			map.tilewidth / tileMapSpriteSheetWidth, map.tileheight / tileMapSpriteSheetHeight )
 	TILE_DECK_2D_MAP:setRect( -0.5, 0.5, 0.5, -0.5 )
 
+	pacmanSpriteSheetWidth = 512
+	pacmanSpriteSheetHeight = 32
+	pacmanSpriteWidth = 20
+	pacmanSpriteHeight = 20
 	pacmanSpriteSheetNumColumn = 13
 	pacmanSpriteSheetNumRow = 1
 	pacmanSpriteNum = pacmanSpriteSheetNumColumn * pacmanSpriteSheetNumRow
 	TILE_DECK_2D_PACMAN = MOAITileDeck2D.new()
 	TILE_DECK_2D_PACMAN:setTexture( "media/pacman.png" )
-	TILE_DECK_2D_PACMAN:setSize( pacmanSpriteSheetNumColumn, pacmanSpriteSheetNumRow )
+	TILE_DECK_2D_PACMAN:setSize( pacmanSpriteSheetNumColumn, pacmanSpriteSheetNumRow,
+			pacmanSpriteWidth / pacmanSpriteSheetWidth, pacmanSpriteHeight / pacmanSpriteSheetHeight )
 	TILE_DECK_2D_PACMAN:setRect( 0, GAME_ENTITY_SIZE, GAME_ENTITY_SIZE, 0 ) -- make pacman's origin at left-top corner
 
+	ghostSpriteSheetWidth = 256
+	ghostSpriteSheetHeight = 32
+	ghostSpriteWidth = 20
+	ghostSpriteHeight = 20
 	ghostSpriteSheetNumColumn = 7 
 	ghostSpriteSheetNumRow = 1
 	ghostSpriteNum = ghostSpriteSheetNumColumn * ghostSpriteSheetNumRow
 
 	TILE_DECK_2D_BLUE = MOAITileDeck2D.new()
 	TILE_DECK_2D_BLUE:setTexture( "media/bluemonster.png" )
-	TILE_DECK_2D_BLUE:setSize( ghostSpriteSheetNumColumn, ghostSpriteSheetNumRow )
+	TILE_DECK_2D_BLUE:setSize( ghostSpriteSheetNumColumn, ghostSpriteSheetNumRow,
+			ghostSpriteWidth / ghostSpriteSheetWidth, ghostSpriteHeight / ghostSpriteSheetHeight)
 	TILE_DECK_2D_BLUE:setRect( 0, GAME_ENTITY_SIZE, GAME_ENTITY_SIZE, 0 ) 
 
 	TILE_DECK_2D_GREEN = MOAITileDeck2D.new()
 	TILE_DECK_2D_GREEN:setTexture( "media/greenmonster.png" )
-	TILE_DECK_2D_GREEN:setSize( ghostSpriteSheetNumColumn, ghostSpriteSheetNumRow )
+	TILE_DECK_2D_GREEN:setSize( ghostSpriteSheetNumColumn, ghostSpriteSheetNumRow,
+			ghostSpriteWidth / ghostSpriteSheetWidth, ghostSpriteHeight / ghostSpriteSheetHeight)
 	TILE_DECK_2D_GREEN:setRect( 0, GAME_ENTITY_SIZE, GAME_ENTITY_SIZE, 0 ) 
 
 	TILE_DECK_2D_RED = MOAITileDeck2D.new()
 	TILE_DECK_2D_RED:setTexture( "media/redmonster.png" )
-	TILE_DECK_2D_RED:setSize( ghostSpriteSheetNumColumn, ghostSpriteSheetNumRow )
+	TILE_DECK_2D_RED:setSize( ghostSpriteSheetNumColumn, ghostSpriteSheetNumRow,
+			ghostSpriteWidth / ghostSpriteSheetWidth, ghostSpriteHeight / ghostSpriteSheetHeight)
 	TILE_DECK_2D_RED:setRect( 0, GAME_ENTITY_SIZE, GAME_ENTITY_SIZE, 0 ) 
 
 	TILE_DECK_2D_YELLOW = MOAITileDeck2D.new()
 	TILE_DECK_2D_YELLOW:setTexture( "media/yellowmonster.png" )
-	TILE_DECK_2D_YELLOW:setSize( ghostSpriteSheetNumColumn, ghostSpriteSheetNumRow )
+	TILE_DECK_2D_YELLOW:setSize( ghostSpriteSheetNumColumn, ghostSpriteSheetNumRow,
+			ghostSpriteWidth / ghostSpriteSheetWidth, ghostSpriteHeight / ghostSpriteSheetHeight)
 	TILE_DECK_2D_YELLOW:setRect( 0, GAME_ENTITY_SIZE, GAME_ENTITY_SIZE, 0 ) 
 end

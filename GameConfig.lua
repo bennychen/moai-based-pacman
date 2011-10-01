@@ -19,7 +19,7 @@ require "media/tiledmap2"
 require "Velocity"
 require "Vector2"
 
-TILE_SIZE = SCREEN_WIDTH / map.width
+TILE_SIZE = 20--SCREEN_WIDTH / map.width
 
 GAME_ENTITY_SIZE = TILE_SIZE
 

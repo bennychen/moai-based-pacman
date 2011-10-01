@@ -33,11 +33,13 @@ function PacmanKilledGameState:enter()
 	self.gameMap:show( self.layer )
 	self.pacman:show( self.layer )
 	self.pacman:setDead()
+	backgroundMusic:stop()
+	pacmanDeadSound:play()
 end
 
 function PacmanKilledGameState:onUpdate()
 	local dyingAnim = self.pacman.animatable:getAnimation( Pacman.ANIM_DYING )
-	if ( dyingAnim:isDone() )
+	if ( dyingAnim:isDone() and not pacmanDeadSound:isPlaying() )
 	then
 		GAME_STATE_MACHINE:setCurrentState( STAGE_INTRO_GAME_STATE )
 	end

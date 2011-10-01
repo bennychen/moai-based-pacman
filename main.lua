@@ -1,4 +1,4 @@
-require "common"
+require "Common"
 require "Game"
 
 RENDER_SYSTEM = {}

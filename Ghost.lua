@@ -51,7 +51,7 @@ function Ghost:setStandBy()
 	self.velocity.speed = 0
 	self.animatable:startAnimation( Ghost.ANIM_PURSUE )
 	self.canCrossBar = true
-	self.isSpellTiming = false
+	self.isSpelled = false
 end
 
 function Ghost:launch()
@@ -107,13 +107,13 @@ function Ghost:startEvadeAnimation()
 end
 
 function Ghost:startSpellTiming( spellDuration )
-	self.isSpellTiming = true
+	self.isSpelled = true
 	self.spellDuration = spellDuration
 	self.spellStartTime = GAME_TIME.elapsedTime
 end
 
 function Ghost:stopSpellTimng()
-	self.isSpellTiming = false
+	self.isSpelled = false
 end
 
 function Ghost:isDead()
@@ -148,7 +148,7 @@ function Ghost:update()
 end
 
 function Ghost:updateSpellTiming()
-	if ( self.isSpellTiming == true )
+	if ( self.isSpelled == true )
 	then
 		local currentTime = GAME_TIME.elapsedTime
 		local spellElapsedTime = currentTime - self.spellStartTime

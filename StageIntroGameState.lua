@@ -67,13 +67,20 @@ function StageIntroGameState:enter()
 	GHOST_SCHEDULER:addSchedule( GHOST_ID_GREEN, GHOST_GREEN_STANDBY_TIME )
 	GHOST_SCHEDULER:addSchedule( GHOST_ID_YELLOW, GHOST_YELLOW_STANDBY_TIME )
 
+	backgroundMusic:stop()
+	stageIntroSound:play()
+
 	self.layer:insertProp( self.readyProp )
 	self.entryTime = MOAISim:getElapsedTime()
 end
 
 function StageIntroGameState:onUpdate()
-	local currentTime = MOAISim:getElapsedTime()
-	if ( currentTime - self.entryTime > StageIntroGameState.duration )
+	--local currentTime = MOAISim:getElapsedTime()
+	--if ( currentTime - self.entryTime > StageIntroGameState.duration )
+	--then
+		--GAME_STATE_MACHINE:setCurrentState( INPLAY_GAME_STATE )
+	--end
+	if ( not stageIntroSound:isPlaying() )
 	then
 		GAME_STATE_MACHINE:setCurrentState( INPLAY_GAME_STATE )
 	end
