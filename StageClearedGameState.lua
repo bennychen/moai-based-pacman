@@ -35,15 +35,11 @@ function StageClearedGameState:enter()
 	self.gameMap:show( self.layer )
 	self.layer:insertProp( self.winProp )
 	self.entryTime = MOAISim:getElapsedTime()
-
-	backgroundMusic:stop()
-	winSound:play()
 end
 
 function StageClearedGameState:onUpdate()
 	local currentTime = MOAISim:getElapsedTime()
-	if ( not winSound:isPlaying() and 
-		 currentTime - self.entryTime > StageClearedGameState.duration )
+	if ( currentTime - self.entryTime > StageClearedGameState.duration )
 	then
 		self.gameMap:resetMap()
 		GAME_STATE_MACHINE:setCurrentState( STAGE_INTRO_GAME_STATE )

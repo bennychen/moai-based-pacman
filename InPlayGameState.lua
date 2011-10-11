@@ -51,19 +51,8 @@ function InPlayGameState:enter()
 	self.yellowGhost:show( self.layer )
 	self.yellowGhost:startCurentAnimation()
 
-	if ( not backgroundMusic:isPlaying() )
-	then
-		backgroundMusic:play()
-	end
-	playingSound:play()
-	if ( self:isAnyGhostSpelled() )
-	then
-		superStateSound:play()
-	end
-
 	self.entryTime = MOAISim:getElapsedTime()
-	--MOAIInputMgr.device.keyboard:setCallback( InPlayGameState.onKeyboardEvent )
-	MOAIInputMgr.device.touch:setCallback( InPlayGameState.onTouchEvent )
+	MOAIInputMgr.device.keyboard:setCallback( InPlayGameState.onKeyboardEvent )
 end
 
 function InPlayGameState:exit()
@@ -80,11 +69,7 @@ function InPlayGameState:exit()
 	self.yellowGhost:hide( self.layer )
 	self.yellowGhost:stopCurrentAnimation()
 
-	playingSound:stop()
-	superStateSound:stop()
-
-	--MOAIInputMgr.device.keyboard:setCallback( nil )
-	MOAIInputMgr.device.touch:setCallback( nil )
+	MOAIInputMgr.device.keyboard:setCallback( nil )
 end
 
 function InPlayGameState:onUpdate()
@@ -128,11 +113,6 @@ function InPlayGameState:updateGhosts()
 	self:updateGhost( self.redGhost )
 	self:updateGhost( self.greenGhost )
 	self:updateGhost( self.yellowGhost )
-
-	if ( not self:isAnyGhostSpelled() )
-	then
-		superStateSound:stop()
-	end
 end
 
 function InPlayGameState:updateGhost( ghost )
@@ -154,17 +134,6 @@ function InPlayGameState:updateGhost( ghost )
 	ghost:moveOneFrameBySpeed()
 end
 
-function InPlayGameState:isAnyGhostSpelled()
-	if ( self.blueGhost.isSpelled or
-		 self.blueGhost.isSpelled or
-		 self.greenGhost.isSpelled or
-		 self.yellowGhost.isSpelled )
-	then
-		return true
-	end
-	return false
-end
-
 function InPlayGameState:onBeanEatten()
 	if ( self.gameMap:isAllBeansCleared() )
 	then
@@ -177,8 +146,6 @@ function InPlayGameState:onSuperBeanEatten()
 	self.redGhost:performSpell( GHOST_EVADE_DURATION )
 	self.greenGhost:performSpell( GHOST_EVADE_DURATION )
 	self.yellowGhost:performSpell( GHOST_EVADE_DURATION )
-
-	superStateSound:play()
 end
 
 function InPlayGameState:seekPathForPacman( desiredDirection )
@@ -326,32 +293,6 @@ function InPlayGameState.onKeyboardEvent( key, down )
 	then
 		GAME_STATE_MACHINE:setCurrentState( PAUSE_GAME_STATE )
 	end
+
 end
 
-function InPlayGameState.onTouchEvent( eventType, idx, x, y, tapCount )
-	if ( eventType == MOAITouchSensor.TOUCH_DOWN )
-	then
-		INPLAY_GAME_STATE.touchBeginX = x
-		INPLAY_GAME_STATE.touchBeginY = y
-	elseif ( eventType == MOAITouchSensor.TOUCH_UP )
-	then
-		local deltaX = x - INPLAY_GAME_STATE.touchBeginX
-		local deltaY = y - INPLAY_GAME_STATE.touchBeginY
-		if ( math.abs( deltaX ) > math.abs( deltaY ) )
-		then
-			if ( deltaX > 0 )
-			then
-				INPLAY_GAME_STATE:tryChangePacmanDirection( DIRECTION_RIGHT )
-			else
-				INPLAY_GAME_STATE:tryChangePacmanDirection( DIRECTION_LEFT )
-			end
-		else
-			if ( deltaY > 0 )
-			then
-				INPLAY_GAME_STATE:tryChangePacmanDirection( DIRECTION_DOWN )
-			else
-				INPLAY_GAME_STATE:tryChangePacmanDirection( DIRECTION_UP )
-			end
-		end
-	end
-end

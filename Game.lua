@@ -27,7 +27,6 @@ require "GhostKilledGameState"
 require "StageClearedGameState"
 require "StateMachine"
 require "Quad2DRepository"
-require "AudioRepository"
 require "EntityManager"
 require "GameMap"
 require "GhostScheduler"
@@ -41,7 +40,6 @@ function Game.init()
 	GAME_TIME = GameTime()
 
 	QUAD_2D_REPOSITORY.init()
-	AUDIO_REPOSITORY.init()
 	GAME_MAP = GameMap()
 	ENTITY_MANAGER = EntityManager()
 	GHOST_SCHEDULER = GhostScheduler()

@@ -34,25 +34,23 @@ function MenuGameState:init( layer )
 	self.menu:setDeck( QUAD_2D_MENU )
 	self.menu:setLoc( BASE_LOCATION_X, BASE_LOCATION_Y )
 
-	--self.cursor = MOAIProp2D.new()
-	--self.cursor:setDeck( QUAD_2D_BEAN )
+	self.cursor = MOAIProp2D.new()
+	self.cursor:setDeck( QUAD_2D_BEAN )
 end
 
 function MenuGameState:enter()
 	GAME_TIME:pause()
 	self.layer:insertProp( self.menu )
-	--self.layer:insertProp( self.cursor )
-	--self.cursorIndex = MenuGameState.MENU_ITEM_START_GAME
-	--self:updateCursorLocation()
-	--MOAIInputMgr.device.keyboard:setCallback( MenuGameState.onKeyboardEvent )
-	MOAIInputMgr.device.touch:setCallback( MenuGameState.onTouchEvent )
+	self.layer:insertProp( self.cursor )
+	self.cursorIndex = MenuGameState.MENU_ITEM_START_GAME
+	self:updateCursorLocation()
+	MOAIInputMgr.device.keyboard:setCallback( MenuGameState.onKeyboardEvent )
 end
 
 function MenuGameState:exit()
 	self.layer:removeProp( self.menu )
-	--self.layer:removeProp( self.cursor )
-	--MOAIInputMgr.device.keyboard:setCallback( nil )
-	MOAIInputMgr.device.touch:setCallback( nil )
+	self.layer:removeProp( self.cursor )
+	MOAIInputMgr.device.keyboard:setCallback( nil )
 end
 
 function MenuGameState:incrementCursorIndex()
@@ -101,11 +99,3 @@ function MenuGameState.onKeyboardEvent( key, down )
 	end
 end
 
-function MenuGameState.onTouchEvent( eventType, idx, x, y, tapCount )
-	if ( MENU_GAME_STATE == nil or down )
-	then
-		return
-	end
-
-	GAME_STATE_MACHINE:setCurrentState( STAGE_INTRO_GAME_STATE )
-end
